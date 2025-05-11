@@ -25,7 +25,6 @@ h1 {
   height: 400px;
   width: 100%;
   border-radius: 12px;
-  margin-bottom: 15px;
 }
 
 .controls {
@@ -44,7 +43,6 @@ h1 {
 
 .controls input {
   border: 1px solid #ddd;
-  font-family: 'Poppins', sans-serif;
 }
 
 .controls button {
@@ -58,9 +56,9 @@ h1 {
 
 .overlay-text {
   position: absolute;
-  top: 10px;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 10px;
+  left: 0;
+  width: 100%;
   text-align: center;
   background-color: rgba(255, 255, 255, 0.8);
   padding: 10px;
