@@ -6,6 +6,8 @@
   <title>Mapa vzpomínek</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="style.css">
+  <!-- Váš vlastní font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <h1>Vytvořte si svou mapu</h1>
@@ -28,7 +30,6 @@
         <textarea id="mapRoute" name="route" hidden></textarea>
         <button type="button" id="placePin">Vybrat bod</button>
         <button type="button" id="startDrawing">Nakreslit trasu</button>
-        <button type="button" id="stopDrawing" style="display: none;">Zastavit kreslení</button>
         <button type="button" id="toggleTheme">Přepnout mapu</button>
         <button type="button" id="resetMap">Vymazat mapu</button>
         <button type="submit" id="saveMap">Odeslat mapu</button>
