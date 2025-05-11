@@ -1,10 +1,10 @@
-// Initialize the map
-const map = L.map('map').setView([50.0755, 14.4378], 13); // Prague as the starting point
+// Inicializace mapy
+const map = L.map('map').setView([50.0755, 14.4378], 13); // Praha jako výchozí bod
 let markers = [];
 let currentRoute = null;
 let addingMarker = false;
 
-// Tile layers for light and dark themes
+// Světlý a tmavý motiv mapy
 const lightTiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
@@ -13,14 +13,14 @@ const darkTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x
   attribution: '&copy; OpenStreetMap contributors'
 });
 
-// Heart icon for the marker
+// Ikona špendlíku ve tvaru srdce
 const heartIcon = L.icon({
   iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Heart_coraz%C3%B3n.svg/32px-Heart_coraz%C3%B3n.svg.png',
   iconSize: [32, 32],
   iconAnchor: [16, 32]
 });
 
-// Toggle between light and dark themes
+// Přepínání mezi světlým a tmavým motivem
 document.getElementById('toggleTheme').addEventListener('click', () => {
   const isDarkTheme = map.hasLayer(lightTiles);
   map.eachLayer(layer => map.removeLayer(layer));
@@ -33,7 +33,7 @@ document.getElementById('toggleTheme').addEventListener('click', () => {
   if (currentRoute) currentRoute.addTo(map);
 });
 
-// Add a pin on map click
+// Přidání špendlíku na kliknutí na mapu
 document.getElementById('addMarker').addEventListener('click', () => {
   addingMarker = true;
   alert('Klikněte na mapu, kam chcete umístit špendlík.');
@@ -56,7 +56,7 @@ map.on('click', (e) => {
   addingMarker = false;
 });
 
-// Add a route connecting all markers
+// Přidání trasy spojující všechny špendlíky
 document.getElementById('addRoute').addEventListener('click', () => {
   if (markers.length < 2) {
     alert('Pro vytvoření trasy je potřeba alespoň 2 špendlíky.');
@@ -66,7 +66,7 @@ document.getElementById('addRoute').addEventListener('click', () => {
   currentRoute = L.polyline(markers.map(marker => marker.getLatLng()), { color: '#df1674' }).addTo(map);
 });
 
-// Save the map as a PDF
+// Uložení mapy jako PDF
 document.getElementById('saveMap').addEventListener('click', () => {
   const canvas = document.querySelector('#map canvas');
   const imgData = canvas.toDataURL('image/png');
@@ -76,7 +76,7 @@ document.getElementById('saveMap').addEventListener('click', () => {
   pdf.save('mapa-vzpominek.pdf');
 });
 
-// Update dynamic text overlay
+// Aktualizace dynamického textového překryvu
 function updateOverlayText() {
   const text = document.getElementById('mapText').value || 'Nadpis';
   const date = document.getElementById('mapDate').value || 'Podnadpis';
