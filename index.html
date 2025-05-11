@@ -17,15 +17,16 @@
       <div class="date">Datum</div>
     </div>
     <form action="https://formsubmit.co/info@atelierlasky.cz" method="POST" id="mapForm">
-      <!-- Nezobrazovat přesměrování po odeslání -->
+      <!-- Skryté pole pro zamezení přesměrování -->
       <input type="hidden" name="_next" value="javascript:void(0);">
       <input type="hidden" name="_subject" value="Nová mapa vzpomínek">
       <div class="controls">
         <input type="text" id="mapText" name="title" placeholder="Text na mapě" required>
         <input type="date" id="mapDate" name="date" required>
         <input type="email" id="userEmail" name="email" placeholder="Zadejte svůj e-mail" required>
+        <input type="hidden" id="colorScheme" name="colorScheme" value="Světlé">
         <textarea id="mapRoute" name="route" hidden></textarea>
-        <button type="button" id="placePin">Umístit špendlík</button>
+        <button type="button" id="placePin">Vybrat bod</button>
         <button type="button" id="startDrawing">Nakreslit trasu</button>
         <button type="button" id="stopDrawing" style="display: none;">Zastavit kreslení</button>
         <button type="button" id="toggleTheme">Přepnout mapu</button>
