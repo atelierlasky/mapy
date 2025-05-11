@@ -16,7 +16,7 @@
     <!-- Průhledný obdélník s nadpisem a datem -->
     <div id="overlayText" class="overlay-text">
       <div class="title" id="mapTitle">Vaše vzpomínka</div>
-      <div class="date" id="mapDateDisplay">Datum: <span id="currentDate"></span></div>
+      <div class="date" id="mapDateDisplay">Datum: <span id="currentDate">11. 5. 2025</span></div>
     </div>
     <form action="https://formsubmit.co/info@atelierlasky.cz" method="POST" id="mapForm">
       <input type="hidden" name="_next" value="https://www.atelierlasky.cz/dekovna-stranka-mapa">
@@ -28,6 +28,7 @@
         <input type="hidden" id="colorScheme" name="colorScheme" value="Světlé">
         <textarea id="mapRoute" name="route" hidden></textarea>
         <textarea id="mapJsonCode" name="json_code" hidden></textarea>
+        <input type="hidden" id="mapImageUrl" name="map_image_url" hidden>
         <button type="button" id="placePin">Vybrat bod</button>
         <button type="button" id="startDrawing">Nakreslit trasu</button>
         <button type="button" id="toggleTheme">Přepnout mapu</button>
