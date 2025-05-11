@@ -13,24 +13,19 @@
   <h1>Vytvořte si svou mapu</h1>
   <div class="map-container">
     <div id="map"></div>
-    <!-- Průhledný obdélník s nadpisem a textem -->
     <div id="overlayText" class="overlay-text">
       <div class="title" id="mapTitle">Vaše vzpomínka</div>
       <div class="subtitle" id="mapTextDisplay">Váš text</div>
     </div>
     <form action="https://formsubmit.co/info@atelierlasky.cz" method="POST" id="mapForm">
-      <input type="hidden" name="_next" value="https://www.atelierlasky.cz/dekovna-stranka-mapa">
-      <input type="hidden" name="_subject" value="Nová mapa vzpomínek">
-      <div class="controls">
-        <input type="text" id="mapText" name="title" placeholder="Text na mapě" required>
+      <div class="controls-row">
+        <input type="text" id="mapText" name="title" placeholder="Vaše vzpomínka" required>
         <input type="text" id="mapCustomText" name="custom_text" placeholder="Váš text" required>
-        <input type="email" id="userEmail" name="email" placeholder="Zadejte svůj e-mail" required>
-        <input type="hidden" id="colorScheme" name="colorScheme" value="Světlé">
-        <textarea id="mapRoute" name="route" hidden></textarea>
-        <textarea id="mapJsonCode" name="json_code" hidden></textarea>
-        <input type="hidden" id="mapImageUrl" name="map_image_url" hidden>
-        <button type="button" id="startDrawing">Nakreslit trasu</button>
+        <input type="email" id="userEmail" name="email" placeholder="Váš e-mail" required>
+      </div>
+      <div class="controls-row">
         <button type="button" id="placePin">Vybrat bod</button>
+        <button type="button" id="startDrawing">Nakreslit trasu</button>
         <button type="button" id="resetMap">Vymazat mapu</button>
         <button type="submit" id="saveMap">Odeslat mapu</button>
       </div>
