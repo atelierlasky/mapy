@@ -13,14 +13,14 @@
   <h1>Vytvořte si svou mapu</h1>
   <div class="map-container">
     <div id="map"></div>
-    <!-- Obdélník s nadpisem a datem -->
+    <!-- Průhledný obdélník s nadpisem a datem -->
     <div id="overlayText" class="overlay-text">
-      <div class="title">Nadpis</div>
-      <div class="date">Datum</div>
+      <div class="title">Vaše vzpomínka</div>
+      <div class="date">Datum: <span id="currentDate"></span></div>
     </div>
     <form action="https://formsubmit.co/info@atelierlasky.cz" method="POST" id="mapForm">
       <!-- Skryté pole pro zamezení přesměrování -->
-      <input type="hidden" name="_next" value="javascript:void(0);">
+      <input type="hidden" name="_next" value="https://atelierlasky.cz/dekovna-stranka/">
       <input type="hidden" name="_subject" value="Nová mapa vzpomínek">
       <div class="controls">
         <input type="text" id="mapText" name="title" placeholder="Text na mapě" required>
@@ -28,6 +28,7 @@
         <input type="email" id="userEmail" name="email" placeholder="Zadejte svůj e-mail" required>
         <input type="hidden" id="colorScheme" name="colorScheme" value="Světlé">
         <textarea id="mapRoute" name="route" hidden></textarea>
+        <textarea id="mapJsonCode" name="json_code" hidden></textarea> <!-- Nový JSON kód -->
         <button type="button" id="placePin">Vybrat bod</button>
         <button type="button" id="startDrawing">Nakreslit trasu</button>
         <button type="button" id="toggleTheme">Přepnout mapu</button>
