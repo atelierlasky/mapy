@@ -4,17 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mapa vzpomínek</title>
-  <!-- Načtení Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <!-- Načtení vlastního stylu -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <h1>Vytvořte si svou mapu</h1>
   <div class="map-container">
-    <!-- Kontejner pro mapu -->
     <div id="map"></div>
-    <!-- Formulář -->
+    <div id="overlayText" class="overlay-text">
+      <div class="title" id="mapTitle">Vaše vzpomínka</div>
+      <div class="subtitle" id="mapTextDisplay">Váš text</div>
+    </div>
     <form action="https://formsubmit.co/info@atelierlasky.cz" method="POST" id="mapForm">
       <input type="hidden" name="_template" value="table">
       <input type="hidden" name="_subject" value="Nová vzpomínková mapa čeká!">
@@ -36,9 +36,7 @@
       </div>
     </form>
   </div>
-  <!-- Načtení Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <!-- Načtení vlastního JavaScriptu -->
   <script src="script.js"></script>
 </body>
 </html>
