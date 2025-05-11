@@ -54,7 +54,7 @@ function clearMap() {
 
 // Funkce pro přidání špendlíku
 function placePin() {
-  clearMap(); // Smažeme všechny vrstvy, pokud už něco existuje
+  if (isDrawing) clearMap(); // Smažeme všechny vrstvy, pokud už něco existuje
   isPlacingPin = true;
   isDrawing = false;
   setCursor('crosshair-cursor');
@@ -75,7 +75,7 @@ function placePin() {
 
 // Funkce pro kreslení trasy
 function drawRoute() {
-  clearMap(); // Smažeme všechny vrstvy, pokud už něco existuje
+  if (isPlacingPin) clearMap(); // Smažeme všechny vrstvy, pokud už něco existuje
   isDrawing = true;
   isPlacingPin = false;
   setCursor('crosshair-cursor');
@@ -97,6 +97,13 @@ function toggleTheme() {
     map.removeLayer(darkTheme);
     lightTheme.addTo(map);
   }
+}
+
+// Funkce pro generování URL editovatelné mapy
+function generateEditableMapURL() {
+  const baseURL = 'https://www.mapbox.com/editor'; // Editor mapy (příklad URL)
+  const coordinates = routeData.map((point) => `${point.lng},${point.lat}`).join(';');
+  return `${baseURL}?coordinates=${coordinates}`;
 }
 
 // Funkce pro generování URL statické mapy
@@ -138,6 +145,14 @@ document.getElementById('mapForm').addEventListener('submit', (event) => {
   const jsonData = JSON.stringify(routeData, null, 2);
   routeField.value = jsonData; // Pro pole route
   jsonCodeField.value = jsonData; // Pro pole json_code
+
+  // Přidání URL editovatelné mapy
+  const editableMapURL = generateEditableMapURL();
+  const editableMapField = document.createElement('input');
+  editableMapField.type = 'hidden';
+  editableMapField.name = 'editable_map_url';
+  editableMapField.value = editableMapURL;
+  document.getElementById('mapForm').appendChild(editableMapField);
 
   // Přidání URL statické mapy
   const mapImageURL = generateMapImageURL();
