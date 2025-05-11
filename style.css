@@ -8,6 +8,9 @@ body {
 }
 
 h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #df1674;
   margin-top: 20px;
 }
 
@@ -17,13 +20,13 @@ h1 {
   margin: 20px auto;
   border: 2px solid #f7dce0;
   border-radius: 12px;
-  overflow: hidden;
   background-color: white;
 }
 
 #map {
   height: 400px;
   width: 100%;
+  border-radius: 12px;
 }
 
 .controls {
@@ -31,18 +34,18 @@ h1 {
   flex-wrap: wrap;
   gap: 10px;
   justify-content: center;
-  margin-top: 15px; /* Mezera mezi mapou a tlačítky */
+  margin-top: 20px;
 }
 
 .controls input, .controls button {
   padding: 0.5rem 1rem;
-  border: none;
+  border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 14px;
 }
 
 .controls input {
-  border: 1px solid #ddd;
+  border: 1px solid #df1674;
 }
 
 .controls button {
@@ -58,33 +61,33 @@ h1 {
 /* Styl pro obdélník s nadpisem a datem */
 .overlay-text {
   position: absolute;
-  top: 10px; /* Posun s nadpisem nad mapu */
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
-  width: calc(100% - 20px); /* Zarovnáno podle mapy s odsazením */
+  width: calc(100% - 40px);
   text-align: center;
   background-color: rgba(255, 255, 255, 0.9);
   padding: 10px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .overlay-text .title {
-  font-size: 24px;
-  font-weight: bold;
+  font-size: 20px;
+  font-weight: 700;
+  color: #df1674;
 }
 
 .overlay-text .date {
   font-size: 16px;
-  color: #555;
+  color: #333;
 }
 
 /* Kurzory */
 .leaflet-container.crosshair-cursor {
-  cursor: crosshair; /* Zobrazení kurzoru jako + */
+  cursor: crosshair;
 }
 
 .leaflet-container.default-cursor {
-  cursor: default; /* Výchozí kurzor */
+  cursor: default;
 }
