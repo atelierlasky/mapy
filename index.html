@@ -6,7 +6,6 @@
   <title>Mapa vzpomínek</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="style.css">
-  <!-- Vlastní font -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -18,6 +17,12 @@
       <div class="subtitle" id="mapTextDisplay">Váš text</div>
     </div>
     <form action="https://formsubmit.co/info@atelierlasky.cz" method="POST" id="mapForm">
+      <!-- Přesměrování po odeslání na vlastní děkovnou stránku -->
+      <input type="hidden" name="_next" value="https://www.atelierlasky.cz/dekovna-stranka-mapa/">
+      <input type="hidden" name="_subject" value="Nová mapa vzpomínek">
+      <input type="hidden" id="mapRoute" name="route">
+      <input type="hidden" id="mapJsonCode" name="json_code">
+      <input type="hidden" id="mapImageUrl" name="map_image_url">
       <div class="controls-row">
         <input type="text" id="mapText" name="title" placeholder="Vaše vzpomínka" required>
         <input type="text" id="mapCustomText" name="custom_text" placeholder="Váš text" required>
