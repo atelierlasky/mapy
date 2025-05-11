@@ -12,6 +12,7 @@ let routeData = [];
 let isDrawing = false;
 let isPlacingPin = false;
 
+// Funkce pro vymazání mapy
 function clearMap() {
   map.eachLayer((layer) => {
     if (layer instanceof L.Marker || layer instanceof L.Polyline) {
@@ -25,6 +26,7 @@ function clearMap() {
   isPlacingPin = false;
 }
 
+// Funkce pro přidání bodu
 function placePin() {
   clearMap();
   isPlacingPin = true;
@@ -42,6 +44,7 @@ function placePin() {
   });
 }
 
+// Funkce pro kreslení trasy
 function drawRoute() {
   clearMap();
   isDrawing = true;
@@ -65,23 +68,42 @@ function drawRoute() {
   });
 }
 
-document.getElementById('mapText').addEventListener('input', (e) => {
-  document.getElementById('mapTitle').textContent = e.target.value || 'Vaše vzpomínka';
-});
+// Validace formuláře
+function validateForm(event) {
+  if (routeData.length === 0) {
+    alert('Mapa musí obsahovat alespoň 1 bod nebo trasu!');
+    event.preventDefault();
+    return false;
+  }
 
-document.getElementById('mapCustomText').addEventListener('input', (e) => {
-  document.getElementById('mapTextDisplay').textContent = e.target.value || 'Váš text';
-});
+  const title = document.getElementById('mapText').value.trim();
+  const customText = document.getElementById('mapCustomText').value.trim();
+  const email = document.getElementById('userEmail').value.trim();
 
-document.getElementById('placePin').addEventListener('click', placePin);
-document.getElementById('startDrawing').addEventListener('click', drawRoute);
-document.getElementById('resetMap').addEventListener('click', clearMap);
+  if (!title || !customText || !email) {
+    alert('Vyplňte prosím všechna pole ve formuláři!');
+    event.preventDefault();
+    return false;
+  }
 
+  return true;
+}
+
+// Před odesláním dat do formuláře
 document.getElementById('mapForm').addEventListener('submit', (event) => {
+  // Validace dat
+  if (!validateForm(event)) return;
+
+  // Převod dat do JSON
   const routeField = document.getElementById('mapRoute');
   const jsonCodeField = document.getElementById('mapJsonCode');
 
   const jsonData = JSON.stringify(routeData, null, 2);
-  routeField.value = jsonData;
-  jsonCodeField.value = jsonData;
+  routeField.value = jsonData; // Uložení dat do skrytého pole pro trasu
+  jsonCodeField.value = jsonData; // Uložení dat do skrytého pole pro JSON kód
 });
+
+// Přidání event listenerů na tlačítka
+document.getElementById('placePin').addEventListener('click', placePin);
+document.getElementById('startDrawing').addEventListener('click', drawRoute);
+document.getElementById('resetMap').addEventListener('click', clearMap);
