@@ -2,17 +2,32 @@
 const map = L.map('map').setView([50.0755, 14.4378], 13); // Praha jako výchozí bod
 let markers = [];
 let currentRoute = null;
+let isDarkTheme = false;
 
-const baseLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+const lightTiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 });
-baseLayer.addTo(map);
+
+const darkTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+});
+
+lightTiles.addTo(map);
 
 // Ikona špendlíku ve tvaru srdce
 const heartIcon = L.icon({
   iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Heart_coraz%C3%B3n.svg/32px-Heart_coraz%C3%B3n.svg.png',
   iconSize: [32, 32],
   iconAnchor: [16, 32],
+});
+
+// Přepínání mezi světlým a tmavým motivem
+document.getElementById('toggleTheme').addEventListener('click', () => {
+  isDarkTheme = !isDarkTheme;
+  map.eachLayer(layer => map.removeLayer(layer));
+  isDarkTheme ? darkTiles.addTo(map) : lightTiles.addTo(map);
+  markers.forEach(marker => marker.addTo(map));
+  if (currentRoute) currentRoute.addTo(map);
 });
 
 // Přidání špendlíku
@@ -26,7 +41,7 @@ document.getElementById('addMarker').addEventListener('click', () => {
   }
 
   const marker = L.marker(map.getCenter(), { icon: heartIcon }).addTo(map);
-  marker.bindPopup(`<strong>${text}</strong><br>${date}`).openPopup();
+  marker.bindPopup(`<div class="marker-text">${text}</div><div class="marker-date">${date}</div>`).openPopup();
   markers.push(marker);
 });
 
@@ -82,7 +97,7 @@ document.getElementById('sendMap').addEventListener('click', () => {
   const pdfData = pdf.output('datauristring');
 
   // Odeslání e-mailu přes EmailJS
-  emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', {
+  emailjs.send('service_your_service_id', 'template_your_template_id', {
     to_email: 'mapa@atelierlasky.cz',
     user_email: email,
     attachment: pdfData,
