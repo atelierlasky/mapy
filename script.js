@@ -97,7 +97,7 @@ document.getElementById('sendMap').addEventListener('click', () => {
   const pdfData = pdf.output('datauristring');
 
   // Odeslání e-mailu přes EmailJS
-  emailjs.send('service_your_service_id', 'template_your_template_id', {
+  emailjs.send('wes1-smtp.wedos.net', 'template_mrwvhrm', {
     to_email: 'mapa@atelierlasky.cz',
     user_email: email,
     attachment: pdfData,
