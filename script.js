@@ -1,56 +1,95 @@
-let map = L.map('map').setView([50.0755, 14.4378], 7); // Praha jako výchozí
+// Inicializace mapy
+const map = L.map('map').setView([50.0755, 14.4378], 13); // Praha jako výchozí bod
 let markers = [];
 let currentRoute = null;
-let baseLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+
+const baseLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+});
 baseLayer.addTo(map);
 
-// Růžové srdíčko jako ikona
+// Ikona špendlíku ve tvaru srdce
 const heartIcon = L.icon({
-  iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Heart_corazón.svg/32px-Heart_corazón.svg.png',
+  iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Heart_coraz%C3%B3n.svg/32px-Heart_coraz%C3%B3n.svg.png',
   iconSize: [32, 32],
   iconAnchor: [16, 32],
 });
 
-function searchLocation() {
-  const input = document.getElementById("search-input").value;
-  fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${input}`)
-    .then(response => response.json())
-    .then(data => {
-      if (data.length > 0) {
-        const latlng = [data[0].lat, data[0].lon];
-        map.setView(latlng, 13);
-      }
-    });
-}
+// Přidání špendlíku
+document.getElementById('addMarker').addEventListener('click', () => {
+  const text = document.getElementById('mapText').value;
+  const date = document.getElementById('mapDate').value;
 
-function addMarker() {
+  if (!text || !date) {
+    alert('Vyplňte text a datum!');
+    return;
+  }
+
   const marker = L.marker(map.getCenter(), { icon: heartIcon }).addTo(map);
+  marker.bindPopup(`<strong>${text}</strong><br>${date}`).openPopup();
   markers.push(marker);
-}
+});
 
-function startRoute() {
+// Přidání trasy
+document.getElementById('addRoute').addEventListener('click', () => {
   if (currentRoute) {
     map.removeLayer(currentRoute);
   }
-  currentRoute = L.polyline(markers.map(m => m.getLatLng()), { color: "#d63384" }).addTo(map);
-}
+  currentRoute = L.polyline(markers.map(marker => marker.getLatLng()), { color: '#df1674' }).addTo(map);
+});
 
-function toggleMap() {
-  map.removeLayer(baseLayer);
-  baseLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png');
-  baseLayer.addTo(map);
-}
+// Zpět (odstraní poslední bod)
+document.getElementById('undoLastPoint').addEventListener('click', () => {
+  if (markers.length > 0) {
+    const lastMarker = markers.pop();
+    map.removeLayer(lastMarker);
 
-function resetMap() {
-  markers.forEach(m => map.removeLayer(m));
+    if (currentRoute) {
+      map.removeLayer(currentRoute);
+      currentRoute = L.polyline(markers.map(marker => marker.getLatLng()), { color: '#df1674' }).addTo(map);
+    }
+  } else {
+    alert('Žádné body k odstranění!');
+  }
+});
+
+// Vymazání mapy
+document.getElementById('resetMap').addEventListener('click', () => {
+  markers.forEach(marker => map.removeLayer(marker));
   markers = [];
   if (currentRoute) {
     map.removeLayer(currentRoute);
     currentRoute = null;
   }
-}
+});
 
-function sendJson() {
-  const body = JSON.stringify(markers.map(m => m.getLatLng()));
-  window.location.href = `mailto:info@atelierlasky.cz?subject=Mapa%20vzpominek&body=${encodeURIComponent(body)}`;
-}
+// Odeslání mapy a generování PDF
+document.getElementById('sendMap').addEventListener('click', () => {
+  const email = document.getElementById('userEmail').value;
+
+  if (!email) {
+    alert('Zadejte platný e-mail!');
+    return;
+  }
+
+  const canvas = document.querySelector('#map canvas');
+  const imgData = canvas.toDataURL('image/png');
+
+  const pdf = new jsPDF('portrait', 'mm', 'a4');
+  pdf.addImage(imgData, 'PNG', 10, 10, 190, 120);
+  pdf.text(`E-mail klienta: ${email}`, 10, 140);
+
+  const pdfData = pdf.output('datauristring');
+
+  // Odeslání e-mailu přes EmailJS
+  emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', {
+    to_email: 'mapa@atelierlasky.cz',
+    user_email: email,
+    attachment: pdfData,
+  }).then(() => {
+    alert('Mapa byla úspěšně odeslána!');
+  }).catch(error => {
+    console.error('Chyba při odesílání e-mailu:', error);
+    alert('Došlo k chybě při odesílání e-mailu.');
+  });
+});
