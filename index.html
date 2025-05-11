@@ -13,17 +13,17 @@
   <h1>Vytvořte si svou mapu</h1>
   <div class="map-container">
     <div id="map"></div>
-    <!-- Průhledný obdélník s nadpisem a datem -->
+    <!-- Průhledný obdélník s nadpisem a podnadpisem -->
     <div id="overlayText" class="overlay-text">
       <div class="title" id="mapTitle">Vaše vzpomínka</div>
-      <div class="date" id="mapDateDisplay">Datum: <span id="currentDate">11. 5. 2025</span></div>
+      <div class="subtitle" id="mapSubtitleDisplay">Podnadpis</div>
     </div>
     <form action="https://formsubmit.co/info@atelierlasky.cz" method="POST" id="mapForm">
       <input type="hidden" name="_next" value="https://www.atelierlasky.cz/dekovna-stranka-mapa">
       <input type="hidden" name="_subject" value="Nová mapa vzpomínek">
       <div class="controls">
         <input type="text" id="mapText" name="title" placeholder="Text na mapě" required>
-        <input type="date" id="mapDate" name="date" required>
+        <input type="text" id="mapSubtitle" name="subtitle" placeholder="Podnadpis" required>
         <input type="email" id="userEmail" name="email" placeholder="Zadejte svůj e-mail" required>
         <input type="hidden" id="colorScheme" name="colorScheme" value="Světlé">
         <textarea id="mapRoute" name="route" hidden></textarea>
