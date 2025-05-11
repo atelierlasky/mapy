@@ -58,7 +58,7 @@ h1 {
 /* Styl pro obdélník s nadpisem a datem */
 .overlay-text {
   position: absolute;
-  top: 10px; /* Posun od vrchní části mapy */
+  bottom: 10px; /* Zarovnání ke spodní hraně mapy */
   left: 50%;
   transform: translateX(-50%);
   width: calc(100% - 20px); /* Zarovnáno podle mapy s odsazením */
