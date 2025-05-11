@@ -38,18 +38,21 @@ h1 {
   margin-top: 20px;
 }
 
-.controls input, .controls button {
+.controls input {
   padding: 0.5rem 1rem;
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 14px;
-}
-
-.controls input {
   border: 1px solid #df1674;
+  flex: 1;
+  max-width: 200px;
 }
 
 .controls button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
   background-color: #df1674;
   color: #fff;
   cursor: pointer;
