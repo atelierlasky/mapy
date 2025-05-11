@@ -30,12 +30,15 @@ function clearMap() {
   routeData = [];
   currentPolyline = null;
   currentMarker = null;
+  isDrawing = false;
+  isPlacingPin = false;
 }
 
 function placePin() {
   if (!map) return;
   clearMap();
   isPlacingPin = true;
+  isDrawing = false;
 
   map.once('click', (e) => {
     currentMarker = L.marker(e.latlng, {
@@ -53,6 +56,7 @@ function drawRoute() {
   if (!map) return;
   clearMap();
   isDrawing = true;
+  isPlacingPin = false;
 
   currentPolyline = L.polyline([], { color: '#df1674', weight: 4 }).addTo(map);
 
@@ -102,17 +106,14 @@ document.getElementById('mapForm').addEventListener('submit', (event) => {
   const routeField = document.getElementById('mapRoute');
   const jsonCodeField = document.getElementById('mapJsonCode');
   const mapImageField = document.getElementById('mapImageUrl');
-  const editorURLField = document.createElement('input');
+  const editorURLField = document.getElementById('editorUrl');
 
   const jsonData = JSON.stringify(routeData, null, 2);
   routeField.value = jsonData;
   jsonCodeField.value = jsonData;
 
   mapImageField.value = `https://staticmap.example.com?data=${encodeURIComponent(jsonData)}`;
-  editorURLField.type = 'hidden';
-  editorURLField.name = 'editor_url';
   editorURLField.value = generateEditorURL();
-  document.getElementById('mapForm').appendChild(editorURLField);
 });
 
 document.getElementById('placePin').addEventListener('click', placePin);
