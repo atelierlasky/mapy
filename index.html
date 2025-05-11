@@ -10,7 +10,7 @@
   <script>
     // Inicializace EmailJS
     (function() {
-      emailjs.init('ETVZN_o8hJ4XCn8Ms'); // Váš API public key
+      emailjs.init('ETVZN_o8hJ4XCn8Ms'); // Váš veřejný API klíč
     })();
   </script>
 </head>
@@ -18,6 +18,10 @@
   <h1>Vytvořte si svou mapu</h1>
   <div class="map-container">
     <div id="map"></div>
+    <div id="overlayText" class="overlay-text">
+      <div class="title">Nadpis</div>
+      <div class="date">Podnadpis</div>
+    </div>
     <div class="controls">
       <input type="text" id="mapText" placeholder="Text na mapě">
       <input type="date" id="mapDate">
