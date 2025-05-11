@@ -10,7 +10,7 @@ body {
 h1 {
   font-size: 32px;
   font-weight: 700;
-  color: #df1674;
+  color: #000; /* Černý nadpis */
   margin-top: 20px;
 }
 
@@ -58,7 +58,7 @@ h1 {
   background-color: #c21465;
 }
 
-/* Styl pro obdélník s nadpisem a datem */
+/* Styl pro průhledný obdélník */
 .overlay-text {
   position: absolute;
   top: 10px;
@@ -70,6 +70,7 @@ h1 {
   padding: 10px;
   border-radius: 6px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
 }
 
 .overlay-text .title {
@@ -85,9 +86,16 @@ h1 {
 
 /* Kurzory */
 .leaflet-container.crosshair-cursor {
-  cursor: crosshair;
+  cursor: crosshair; /* Zaměřovací kurzor */
 }
 
 .leaflet-container.default-cursor {
   cursor: default;
+}
+
+/* Styl růžového srdce */
+.heart-icon {
+  color: #df1674;
+  font-size: 60px; /* Zvýšení velikosti srdce */
+  text-align: center;
 }
