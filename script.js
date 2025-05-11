@@ -13,11 +13,12 @@ const darkTiles = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x
   attribution: '&copy; OpenStreetMap contributors'
 });
 
-// Ikona špendlíku ve tvaru srdce
-const heartIcon = L.icon({
-  iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Heart_coraz%C3%B3n.svg/32px-Heart_coraz%C3%B3n.svg.png',
+// Špendlík ve tvaru vyplněného srdce
+const heartIcon = L.divIcon({
+  className: 'material-symbols-outlined',
+  html: 'favorite',
   iconSize: [32, 32],
-  iconAnchor: [16, 32]
+  iconAnchor: [16, 16]
 });
 
 // Přepínání mezi světlým a tmavým motivem
@@ -42,16 +43,7 @@ document.getElementById('addMarker').addEventListener('click', () => {
 map.on('click', (e) => {
   if (!addingMarker) return;
 
-  const text = document.getElementById('mapText').value || 'Bez textu';
-  const date = document.getElementById('mapDate').value || 'Datum neuvedeno';
-
   const marker = L.marker(e.latlng, { icon: heartIcon }).addTo(map);
-  marker.bindPopup(`
-    <div class="marker-popup">
-      <div class="title">${text}</div>
-      <div class="date">${date}</div>
-    </div>
-  `).openPopup();
   markers.push(marker);
   addingMarker = false;
 });
@@ -69,8 +61,12 @@ document.getElementById('addRoute').addEventListener('click', () => {
 // Uložení mapy jako PDF
 document.getElementById('saveMap').addEventListener('click', () => {
   const canvas = document.querySelector('#map canvas');
-  const imgData = canvas.toDataURL('image/png');
+  if (!canvas) {
+    alert('Mapa není připravena.');
+    return;
+  }
 
+  const imgData = canvas.toDataURL('image/png');
   const pdf = new jsPDF('portrait', 'mm', 'a4');
   pdf.addImage(imgData, 'PNG', 10, 10, 190, 120);
   pdf.save('mapa-vzpominek.pdf');
@@ -79,11 +75,17 @@ document.getElementById('saveMap').addEventListener('click', () => {
 // Aktualizace dynamického textového překryvu
 function updateOverlayText() {
   const text = document.getElementById('mapText').value || 'Nadpis';
-  const date = document.getElementById('mapDate').value || 'Podnadpis';
+  const dateInput = document.getElementById('mapDate').value || '';
+  const date = dateInput ? formatDate(dateInput) : 'Podnadpis';
   document.getElementById('overlayText').innerHTML = `
     <div class="title">${text}</div>
     <div class="date">${date}</div>
   `;
+}
+
+function formatDate(dateString) {
+  const [year, month, day] = dateString.split('-');
+  return `${parseInt(day)}. ${parseInt(month)}. ${year}`;
 }
 
 document.getElementById('mapText').addEventListener('input', updateOverlayText);
