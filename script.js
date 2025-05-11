@@ -22,13 +22,13 @@ L.control.zoom({
   position: 'topleft', // Posuneme zoomovací tlačítka do levé strany
 }).addTo(map);
 
-// Automatické propisování nadpisu a podnadpisu
+// Automatické propisování nadpisu a textu
 document.getElementById('mapText').addEventListener('input', (e) => {
   document.getElementById('mapTitle').textContent = e.target.value || 'Vaše vzpomínka';
 });
 
-document.getElementById('mapSubtitle').addEventListener('input', (e) => {
-  document.getElementById('mapSubtitleDisplay').textContent = e.target.value || 'Podnadpis';
+document.getElementById('mapCustomText').addEventListener('input', (e) => {
+  document.getElementById('mapTextDisplay').textContent = e.target.value || 'Váš text';
 });
 
 // Funkce pro nastavení kurzoru
