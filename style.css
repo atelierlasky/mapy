@@ -17,7 +17,7 @@ h1 {
 .map-container {
   position: relative;
   max-width: 800px;
-  height: 400px; /* Zmenšení výšky mapy */
+  height: 400px; /* Výška mapy */
   margin: 20px auto;
   border: 2px solid #f7dce0;
   border-radius: 12px;
@@ -87,9 +87,8 @@ h1 {
 
 /* Zoom tlačítka */
 .leaflet-control-zoom {
-  left: 20px; /* Zarovnáme k levé straně mapy */
-  top: 50%; /* Posuneme do středu mapy */
-  transform: translateY(-50%);
+  left: 20px; /* Posuneme zoomovací tlačítka do levé strany mapy */
+  top: 80px; /* Posuneme zoomovací tlačítka dolů */
 }
 
 /* Kurzory */
