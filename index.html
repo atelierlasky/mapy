@@ -3,168 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Editor mapy</title>
+  <title>Mapa vzpomínek</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=favorite" />
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 10px;
-    }
-    #map {
-      height: 350px;
-      width: 100%;
-      max-width: 500px;
-      margin: auto;
-    }
-    .button-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-      margin: 10px auto;
-      max-width: 500px;
-    }
-    .map-button {
-      padding: 10px 20px;
-      background-color: #ffc807;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 16px;
-      transition: background-color 0.3s;
-    }
-    .map-button:hover {
-      background-color: #ffbb00;
-    }
-    .map-button.save {
-      background-color: #df1674;
-    }
-    .map-button.save:hover {
-      background-color: #aa1359;
-    }
-    #emailInput {
-      display: block;
-      margin: 10px auto;
-      max-width: 500px;
-      padding: 8px;
-      font-size: 16px;
-      width: 100%;
-    }
-    #messageBox {
-      display: none;
-      padding: 10px;
-      background-color: #28a745;
-      color: white;
-      text-align: center;
-      border-radius: 5px;
-      margin-top: 10px;
-    }
-    .material-symbols-outlined {
-      font-size: 32px;
-      color: #df1674;
-    }
-  </style>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,1,-50..200&icon_names=favorite" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<h2 style="text-align: center;">Vytvořte si svou mapu</h2>
-<input type="text" id="searchBox" placeholder="Vyhledat místo...">
-<div id="map"></div>
-<input type="email" id="emailInput" placeholder="Zadejte svůj e-mail...">
-<div class="button-group">
-  <button class="map-button" onclick="setMode('point')">Vyberte bod</button>
-  <button class="map-button" onclick="setMode('route')">Vyberte trasu</button>
-  <button class="map-button" id="toggleMapButton">Přepněte mapu</button>
-  <button class="map-button" id="undoButton">Zpět</button>
-  <button class="map-button" id="resetButton">Začít od začátku</button>
-  <button class="map-button save" id="saveButton">Uložit</button>
-</div>
-<div id="messageBox">Děkujeme. Vložte mapu do košíku v požadovaném provedení.</div>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-  const light = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-  });
-
-  const dark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-  });
-
-  const map = L.map('map', {
-    center: [50.0755, 14.4378],
-    zoom: 13,
-    layers: [light]
-  });
-
-  const drawnItems = L.featureGroup().addTo(map);
-  let currentMode = null;
-  let routePoints = [];
-  const history = [];
-  let pointMarker = null;
-  let routeLine = null;
-  let currentBaseLayer = light;
-
-  document.getElementById('toggleMapButton').addEventListener('click', function() {
-    if (currentBaseLayer === light) {
-      map.removeLayer(light);
-      map.addLayer(dark);
-      currentBaseLayer = dark;
-    } else {
-      map.removeLayer(dark);
-      map.addLayer(light);
-      currentBaseLayer = light;
-    }
-  });
-
-  function setMode(mode) {
-    currentMode = mode;
-    if (mode === 'route') routePoints = [];
-    else if (mode === 'point' && pointMarker) {
-      drawnItems.removeLayer(pointMarker);
-    }
-  }
-
-  map.on('click', function(e) {
-    if (currentMode === 'point') {
-      if (pointMarker) drawnItems.removeLayer(pointMarker);
-      pointMarker = L.marker(e.latlng, {
-        icon: L.divIcon({
-          className: 'material-symbols-outlined',
-          html: 'favorite',
-          iconSize: [32, 32]
-        })
-      }).addTo(drawnItems);
-    } else if (currentMode === 'route') {
-      const marker = L.marker(e.latlng).addTo(drawnItems);
-      routePoints.push(e.latlng);
-      history.push({ marker });
-
-      if (routeLine) drawnItems.removeLayer(routeLine);
-      routeLine = L.polyline(routePoints, { color: 'blue' }).addTo(drawnItems);
-    }
-  });
-
-  document.getElementById('resetButton').addEventListener('click', function() {
-    drawnItems.clearLayers();
-    routePoints = [];
-    history.length = 0;
-    pointMarker = null;
-    routeLine = null;
-  });
-
-  document.getElementById('saveButton').addEventListener('click', function() {
-    const email = document.getElementById('emailInput').value;
-    if (email) {
-      console.log(`Odesílám mapu na e-mail: ${email}`);
-      document.getElementById('messageBox').style.display = 'block';
-    } else {
-      alert('Zadejte prosím svůj e-mail.');
-    }
-  });
-</script>
-
+  <h1>Vytvořte si svou mapu</h1>
+  <div class="map-container">
+    <div id="map"></div>
+    <div id="overlayText" class="overlay-text">
+      <div class="title">Nadpis</div>
+      <div class="date">Podnadpis</div>
+    </div>
+    <div class="controls">
+      <input type="text" id="mapText" placeholder="Text na mapě">
+      <input type="date" id="mapDate">
+      <input type="email" id="userEmail" placeholder="Zadejte svůj e-mail">
+      <button id="addMarker">Přidat špendlík</button>
+      <button id="addRoute">Přidat trasu</button>
+      <button id="toggleTheme">Přepnout mapu</button>
+      <button id="resetMap">Vymazat mapu</button>
+      <button id="saveMap">Uložit</button>
+    </div>
+  </div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf"></script>
+  <script src="script.js"></script>
 </body>
 </html>
