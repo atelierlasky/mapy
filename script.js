@@ -1,14 +1,15 @@
-// Inicializace mapy
+// Initialize the map
 const map = L.map('map', {
-  zoomControl: false, // Skryjeme původní zoomovací ovládání, upravíme ho později
+  zoomControl: false, // Disable default zoom controls
 }).setView([50.0755, 14.4378], 13);
+
 let currentPolyline = null;
 let currentMarker = null;
-let routeData = []; // Pole pro uložení souřadnic trasy a špendlíku
-let isDrawing = false; // Stav, zda uživatel kreslí trasu
-let isPlacingPin = false; // Stav, zda uživatel umísťuje špendlík
+let routeData = []; // Array to store route and pin data
+let isDrawing = false; // Indicates if the user is drawing a route
+let isPlacingPin = false; // Indicates if the user is placing a pin
 
-// Přidání mapových vrstev (světlý a tmavý motiv)
+// Add map layers (light and dark themes)
 const lightTheme = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap contributors',
 }).addTo(map);
@@ -17,12 +18,12 @@ const darkTheme = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x
   attribution: '&copy; OpenStreetMap contributors',
 });
 
-// Přidání vlastního zoomovacího ovládání
+// Add custom zoom controls
 L.control.zoom({
-  position: 'topleft', // Posuneme zoomovací tlačítka do levé strany
+  position: 'topleft', // Move zoom controls to the left side
 }).addTo(map);
 
-// Automatické propisování nadpisu a textu
+// Automatically update the overlay text
 document.getElementById('mapText').addEventListener('input', (e) => {
   document.getElementById('mapTitle').textContent = e.target.value || 'Vaše vzpomínka';
 });
@@ -31,14 +32,14 @@ document.getElementById('mapCustomText').addEventListener('input', (e) => {
   document.getElementById('mapTextDisplay').textContent = e.target.value || 'Váš text';
 });
 
-// Funkce pro nastavení kurzoru
+// Set cursor style
 function setCursor(cursorClass) {
   const container = map.getContainer();
   container.classList.remove('crosshair-cursor', 'default-cursor');
   container.classList.add(cursorClass);
 }
 
-// Funkce pro mazání všech vrstev
+// Clear all layers from the map
 function clearMap() {
   map.eachLayer((layer) => {
     if (layer instanceof L.Marker || layer instanceof L.Polyline) {
@@ -52,9 +53,9 @@ function clearMap() {
   isPlacingPin = false;
 }
 
-// Funkce pro přidání špendlíku
+// Add a pin to the map
 function placePin() {
-  if (isDrawing) clearMap(); // Smažeme všechny vrstvy, pokud už něco existuje
+  if (isDrawing) clearMap(); // Clear all layers if switching mode
   isPlacingPin = true;
   isDrawing = false;
   setCursor('crosshair-cursor');
@@ -63,19 +64,19 @@ function placePin() {
     currentMarker = L.marker(e.latlng, {
       icon: L.divIcon({
         className: 'heart-icon',
-        html: '&#x2764;', // Růžové srdce
-        iconSize: [60, 60], // Zvýšení velikosti srdce
+        html: '&#x2764;', // Heart icon
+        iconSize: [60, 60], // Increase heart size
       }),
     }).addTo(map);
 
-    routeData = [{ type: 'pin', lat: e.latlng.lat, lng: e.latlng.lng }]; // Uložíme data špendlíku
+    routeData = [{ type: 'pin', lat: e.latlng.lat, lng: e.latlng.lng }]; // Store pin data
     setCursor('default-cursor');
   });
 }
 
-// Funkce pro kreslení trasy
+// Draw a route on the map
 function drawRoute() {
-  if (isPlacingPin) clearMap(); // Smažeme všechny vrstvy, pokud už něco existuje
+  if (isPlacingPin) clearMap(); // Clear all layers if switching mode
   isDrawing = true;
   isPlacingPin = false;
   setCursor('crosshair-cursor');
@@ -84,22 +85,22 @@ function drawRoute() {
 
   map.on('click', (e) => {
     if (routeData.length === 0) {
-      // Přidáme srdíčko na začátek trasy
+      // Add a heart icon at the start of the route
       currentMarker = L.marker(e.latlng, {
         icon: L.divIcon({
           className: 'heart-icon',
-          html: '&#x2764;', // Růžové srdce
+          html: '&#x2764;', // Heart icon
           iconSize: [60, 60],
         }),
       }).addTo(map);
     }
 
     currentPolyline.addLatLng(e.latlng);
-    routeData.push({ type: 'route', lat: e.latlng.lat, lng: e.latlng.lng }); // Uložíme data trasy
+    routeData.push({ type: 'route', lat: e.latlng.lat, lng: e.latlng.lng }); // Store route data
   });
 }
 
-// Funkce pro přepínání motivů
+// Toggle map themes
 function toggleTheme() {
   if (map.hasLayer(lightTheme)) {
     map.removeLayer(lightTheme);
@@ -110,7 +111,7 @@ function toggleTheme() {
   }
 }
 
-// Funkce pro kontrolu správnosti formuláře
+// Validate the form before submission
 function validateForm(event) {
   if (routeData.length === 0) {
     alert('Mapa musí obsahovat alespoň 1 bod nebo trasu!');
@@ -118,7 +119,7 @@ function validateForm(event) {
     return false;
   }
 
-  // Kontrola vyplnění všech povinných polí
+  // Check if all required fields are filled
   const title = document.getElementById('mapText').value.trim();
   const customText = document.getElementById('mapCustomText').value.trim();
   const email = document.getElementById('userEmail').value.trim();
@@ -132,7 +133,7 @@ function validateForm(event) {
   return true;
 }
 
-// Před odesláním formuláře přidáme data a URL mapy
+// Prepare data and URL before form submission
 document.getElementById('mapForm').addEventListener('submit', (event) => {
   if (!validateForm(event)) return;
 
@@ -140,17 +141,17 @@ document.getElementById('mapForm').addEventListener('submit', (event) => {
   const jsonCodeField = document.getElementById('mapJsonCode');
   const mapImageField = document.getElementById('mapImageUrl');
 
-  // Generování JSON dat
+  // Generate JSON data
   const jsonData = JSON.stringify(routeData, null, 2);
-  routeField.value = jsonData; // Pro pole route
-  jsonCodeField.value = jsonData; // Pro pole json_code
+  routeField.value = jsonData; // For the 'route' field
+  jsonCodeField.value = jsonData; // For the 'json_code' field
 
-  // Přidání URL statické mapy
-  const mapImageURL = generateMapImageURL();
+  // Add a static map URL (example)
+  const mapImageURL = `https://example.com/map?data=${encodeURIComponent(jsonData)}`;
   mapImageField.value = mapImageURL;
 });
 
-// Přidání událostí k tlačítkům
+// Add event listeners to buttons
 document.getElementById('placePin').addEventListener('click', placePin);
 document.getElementById('startDrawing').addEventListener('click', drawRoute);
 document.getElementById('toggleTheme').addEventListener('click', toggleTheme);
