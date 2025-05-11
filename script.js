@@ -22,19 +22,13 @@ L.control.zoom({
   position: 'topleft', // Posuneme zoomovací tlačítka do levé strany
 }).addTo(map);
 
-// Zobrazení aktuálního data v českém formátu
-const defaultDate = '11. 5. 2025';
-document.getElementById('currentDate').textContent = defaultDate;
-
-// Automatické propisování nadpisu a datumu
+// Automatické propisování nadpisu a podnadpisu
 document.getElementById('mapText').addEventListener('input', (e) => {
   document.getElementById('mapTitle').textContent = e.target.value || 'Vaše vzpomínka';
 });
 
-document.getElementById('mapDate').addEventListener('input', (e) => {
-  const inputDate = new Date(e.target.value);
-  const formattedDate = inputDate.toLocaleDateString('cs-CZ'); // Formát CZ datumu
-  document.getElementById('mapDateDisplay').textContent = `Datum: ${formattedDate}`;
+document.getElementById('mapSubtitle').addEventListener('input', (e) => {
+  document.getElementById('mapSubtitleDisplay').textContent = e.target.value || 'Podnadpis';
 });
 
 // Funkce pro nastavení kurzoru
