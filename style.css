@@ -56,24 +56,9 @@ h1 {
   background-color: #c21465;
 }
 
-.marker-popup {
-  font-family: 'Poppins', sans-serif;
-  text-align: center;
-}
-
-.marker-popup .title {
-  font-size: 16px;
-  font-weight: bold;
-}
-
-.marker-popup .date {
-  font-size: 12px;
-  color: #555;
-}
-
 .overlay-text {
   position: absolute;
-  bottom: 20px;
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
@@ -81,6 +66,7 @@ h1 {
   padding: 10px;
   border-radius: 8px;
   font-family: 'Poppins', sans-serif;
+  z-index: 1000;
 }
 
 .overlay-text .title {
@@ -91,4 +77,8 @@ h1 {
 .overlay-text .date {
   font-size: 16px;
   color: #555;
+}
+
+.leaflet-container {
+  cursor: crosshair;
 }
