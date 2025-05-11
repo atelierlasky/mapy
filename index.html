@@ -11,24 +11,24 @@
 <body>
   <h1>Vytvořte si svou mapu</h1>
   <div class="map-container">
-    <div id="map"></div>
     <div id="overlayText" class="overlay-text">
       <div class="title">Nadpis</div>
       <div class="date">Podnadpis</div>
     </div>
+    <div id="map"></div>
     <div class="controls">
       <input type="text" id="mapText" placeholder="Text na mapě">
       <input type="date" id="mapDate">
       <input type="email" id="userEmail" placeholder="Zadejte svůj e-mail">
-      <button id="addMarker">Přidat špendlík</button>
-      <button id="addRoute">Přidat trasu</button>
+      <button id="startDrawing">Začít kreslit trasu</button>
+      <button id="stopDrawing">Zastavit kreslení</button>
       <button id="toggleTheme">Přepnout mapu</button>
       <button id="resetMap">Vymazat mapu</button>
       <button id="saveMap">Uložit</button>
     </div>
   </div>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jspdf"></script>
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@2.6.4/dist/email.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
