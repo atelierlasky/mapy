@@ -1,7 +1,11 @@
 body {
   margin: 0;
-  font-family: "Poppins", sans-serif;
+  font-family: 'Poppins', sans-serif;
   background-color: #fffafc;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: 'Lora', serif;
 }
 
 .map-container {
@@ -14,7 +18,7 @@ body {
 }
 
 #map {
-  height: 400px;
+  height: 350px;
   width: 100%;
   filter: grayscale(100%) brightness(0.9);
 }
@@ -33,6 +37,7 @@ body {
   flex: 1 0 60%;
   border: 1px solid #f0b6c1;
   border-radius: 6px;
+  font-family: 'Poppins', sans-serif;
 }
 
 .controls button {
@@ -44,6 +49,7 @@ body {
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.3s;
+  font-family: 'Poppins', sans-serif;
 }
 
 .controls button:hover {
