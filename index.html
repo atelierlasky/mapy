@@ -17,12 +17,14 @@
       <div class="subtitle" id="mapTextDisplay">Váš text</div>
     </div>
     <form action="https://formsubmit.co/info@atelierlasky.cz" method="POST" id="mapForm">
-      <!-- Přesměrování po odeslání na vlastní děkovnou stránku -->
+      <!-- Skrytá pole -->
+      <input type="hidden" name="_template" value="table">
+      <input type="hidden" name="_subject" value="Nová vzpomínková mapa čeká!">
       <input type="hidden" name="_next" value="https://www.atelierlasky.cz/dekovna-stranka-mapa/">
-      <input type="hidden" name="_subject" value="Nová mapa vzpomínek">
       <input type="hidden" id="mapRoute" name="route">
       <input type="hidden" id="mapJsonCode" name="json_code">
       <input type="hidden" id="mapImageUrl" name="map_image_url">
+      <input type="hidden" id="editorUrl" name="editor_url">
       <div class="controls-row">
         <input type="text" id="mapText" name="title" placeholder="Vaše vzpomínka" required>
         <input type="text" id="mapCustomText" name="custom_text" placeholder="Váš text" required>
