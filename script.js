@@ -5,7 +5,12 @@ function initializeMap() {
     return null;
   }
 
-  const map = L.map('map').setView([50.0755, 14.4378], 13);
+  // Inicializace mapy bez zoomovacích tlačítek
+  const map = L.map('map', {
+    zoomControl: false, // Zakáže zoomovací tlačítka
+  }).setView([50.0755, 14.4378], 13);
+
+  // Přidání základní vrstvy mapy
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors',
   }).addTo(map);
@@ -20,6 +25,7 @@ let routeData = [];
 let isDrawing = false;
 let isPlacingPin = false;
 
+// Funkce pro vymazání mapy
 function clearMap() {
   if (!map) return;
   map.eachLayer((layer) => {
@@ -34,6 +40,7 @@ function clearMap() {
   isPlacingPin = false;
 }
 
+// Funkce pro přidání bodu
 function placePin() {
   if (!map) return;
   clearMap();
@@ -52,6 +59,7 @@ function placePin() {
   });
 }
 
+// Funkce pro kreslení trasy
 function drawRoute() {
   if (!map) return;
   clearMap();
