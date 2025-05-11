@@ -1,24 +1,11 @@
-function initializeMap() {
-  const mapContainer = document.getElementById('map');
-  if (!mapContainer) {
-    console.error('Map container not found.');
-    return null;
-  }
+// Inicializace mapy
+const map = L.map('map').setView([50.0755, 14.4378], 13);
 
-  // Inicializace mapy bez zoomovacích tlačítek
-  const map = L.map('map', {
-    zoomControl: false, // Zakáže zoomovací tlačítka
-  }).setView([50.0755, 14.4378], 13);
+// Přidání dlaždic OpenStreetMap
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors',
+}).addTo(map);
 
-  // Přidání základní vrstvy mapy
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors',
-  }).addTo(map);
-
-  return map;
-}
-
-const map = initializeMap();
 let currentPolyline = null;
 let currentMarker = null;
 let routeData = [];
@@ -42,7 +29,6 @@ function clearMap() {
 
 // Funkce pro přidání bodu
 function placePin() {
-  if (!map) return;
   clearMap();
   isPlacingPin = true;
   isDrawing = false;
@@ -61,7 +47,6 @@ function placePin() {
 
 // Funkce pro kreslení trasy
 function drawRoute() {
-  if (!map) return;
   clearMap();
   isDrawing = true;
   isPlacingPin = false;
@@ -74,14 +59,7 @@ function drawRoute() {
   });
 }
 
-document.getElementById('mapText').addEventListener('input', (e) => {
-  document.getElementById('mapTitle').textContent = e.target.value || 'Vaše vzpomínka';
-});
-
-document.getElementById('mapCustomText').addEventListener('input', (e) => {
-  document.getElementById('mapTextDisplay').textContent = e.target.value || 'Váš text';
-});
-
+// Validace formuláře
 function validateForm(event) {
   if (routeData.length === 0) {
     alert('Mapa musí obsahovat alespoň 1 bod nebo trasu!');
@@ -102,12 +80,7 @@ function validateForm(event) {
   return true;
 }
 
-function generateEditorURL() {
-  const baseURL = 'https://www.mapeditor.com';
-  const coordinates = routeData.map((point) => `${point.lng},${point.lat}`).join(';');
-  return `${baseURL}?data=${encodeURIComponent(coordinates)}`;
-}
-
+// Odesílání dat z formuláře
 document.getElementById('mapForm').addEventListener('submit', (event) => {
   if (!validateForm(event)) return;
 
@@ -119,11 +92,10 @@ document.getElementById('mapForm').addEventListener('submit', (event) => {
   const jsonData = JSON.stringify(routeData, null, 2);
   routeField.value = jsonData;
   jsonCodeField.value = jsonData;
-
   mapImageField.value = `https://staticmap.example.com?data=${encodeURIComponent(jsonData)}`;
-  editorURLField.value = generateEditorURL();
 });
 
+// Přidání event listenerů na tlačítka
 document.getElementById('placePin').addEventListener('click', placePin);
 document.getElementById('startDrawing').addEventListener('click', drawRoute);
 document.getElementById('resetMap').addEventListener('click', clearMap);
