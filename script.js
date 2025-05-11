@@ -30,19 +30,35 @@ document.getElementById('toggleTheme').addEventListener('click', () => {
   if (currentRoute) currentRoute.addTo(map);
 });
 
-// Přidání špendlíku
+// Přidání špendlíku na kliknutí na mapu
+let addingMarker = false;
+
 document.getElementById('addMarker').addEventListener('click', () => {
+  addingMarker = true;
+  alert('Klikněte na mapu, kam chcete umístit špendlík.');
+});
+
+map.on('click', (e) => {
+  if (!addingMarker) return;
+
   const text = document.getElementById('mapText').value;
   const date = document.getElementById('mapDate').value;
 
   if (!text || !date) {
-    alert('Vyplňte text a datum!');
+    alert('Vyplňte text a datum před přidáním špendlíku!');
     return;
   }
 
-  const marker = L.marker(map.getCenter(), { icon: heartIcon }).addTo(map);
-  marker.bindPopup(`<div class="marker-text">${text}</div><div class="marker-date">${date}</div>`).openPopup();
+  const marker = L.marker(e.latlng, { icon: heartIcon }).addTo(map);
+  marker.bindPopup(`
+    <div class="marker-popup">
+      <div class="title">${text}</div>
+      <div class="date">${date}</div>
+    </div>
+  `).openPopup();
+
   markers.push(marker);
+  addingMarker = false;
 });
 
 // Přidání trasy
@@ -53,58 +69,12 @@ document.getElementById('addRoute').addEventListener('click', () => {
   currentRoute = L.polyline(markers.map(marker => marker.getLatLng()), { color: '#df1674' }).addTo(map);
 });
 
-// Zpět (odstraní poslední bod)
-document.getElementById('undoLastPoint').addEventListener('click', () => {
-  if (markers.length > 0) {
-    const lastMarker = markers.pop();
-    map.removeLayer(lastMarker);
-
-    if (currentRoute) {
-      map.removeLayer(currentRoute);
-      currentRoute = L.polyline(markers.map(marker => marker.getLatLng()), { color: '#df1674' }).addTo(map);
-    }
-  } else {
-    alert('Žádné body k odstranění!');
-  }
-});
-
-// Vymazání mapy
-document.getElementById('resetMap').addEventListener('click', () => {
-  markers.forEach(marker => map.removeLayer(marker));
-  markers = [];
-  if (currentRoute) {
-    map.removeLayer(currentRoute);
-    currentRoute = null;
-  }
-});
-
-// Odeslání mapy a generování PDF
-document.getElementById('sendMap').addEventListener('click', () => {
-  const email = document.getElementById('userEmail').value;
-
-  if (!email) {
-    alert('Zadejte platný e-mail!');
-    return;
-  }
-
+// Uložení mapy jako PDF
+document.getElementById('saveMap').addEventListener('click', () => {
   const canvas = document.querySelector('#map canvas');
   const imgData = canvas.toDataURL('image/png');
 
   const pdf = new jsPDF('portrait', 'mm', 'a4');
   pdf.addImage(imgData, 'PNG', 10, 10, 190, 120);
-  pdf.text(`E-mail klienta: ${email}`, 10, 140);
-
-  const pdfData = pdf.output('datauristring');
-
-  // Odeslání e-mailu přes EmailJS
-  emailjs.send('wes1-smtp.wedos.net', 'template_mrwvhrm', {
-    to_email: 'mapa@atelierlasky.cz',
-    user_email: email,
-    attachment: pdfData,
-  }).then(() => {
-    alert('Mapa byla úspěšně odeslána!');
-  }).catch(error => {
-    console.error('Chyba při odesílání e-mailu:', error);
-    alert('Došlo k chybě při odesílání e-mailu.');
-  });
+  pdf.save('mapa-vzpominek.pdf');
 });
