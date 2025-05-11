@@ -10,14 +10,14 @@ body {
 h1 {
   font-size: 32px;
   font-weight: 700;
-  color: #000; /* Černý nadpis */
+  color: #000;
   margin-top: 20px;
 }
 
 .map-container {
   position: relative;
   max-width: 800px;
-  height: 400px; /* Výška mapy */
+  height: 400px;
   margin: 20px auto;
   border: 2px solid #f7dce0;
   border-radius: 12px;
@@ -25,44 +25,42 @@ h1 {
 }
 
 #map {
-  height: 100%; /* Mapu roztáhneme na celou výšku kontejnru */
+  height: 100%; /* Zaručení, že mapa bude viditelná */
   width: 100%;
   border-radius: 12px;
 }
 
-.controls {
+.controls-row {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   justify-content: center;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
-.controls input {
+.controls-row input, .controls-row button {
   padding: 0.5rem 1rem;
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 14px;
-  border: 1px solid #df1674;
-  flex: 1;
   max-width: 200px;
 }
 
-.controls button {
-  padding: 0.5rem 1rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 14px;
+.controls-row input {
+  border: 1px solid #df1674;
+}
+
+.controls-row button {
   background-color: #df1674;
   color: #fff;
   cursor: pointer;
 }
 
-.controls button:hover {
+.controls-row button:hover {
   background-color: #c21465;
 }
 
-/* Styl pro průhledný obdélník */
+/* Styl průhledného obdélníku */
 .overlay-text {
   position: absolute;
   top: 10px;
@@ -86,26 +84,4 @@ h1 {
 .overlay-text .subtitle {
   font-size: 16px;
   color: #333;
-}
-
-/* Zoom tlačítka */
-.leaflet-control-zoom {
-  left: 20px; /* Posuneme zoomovací tlačítka do levé strany mapy */
-  top: 80px; /* Posuneme zoomovací tlačítka dolů */
-}
-
-/* Kurzory */
-.leaflet-container.crosshair-cursor {
-  cursor: crosshair; /* Zaměřovací kurzor */
-}
-
-.leaflet-container.default-cursor {
-  cursor: default;
-}
-
-/* Styl růžového srdce */
-.heart-icon {
-  color: #df1674;
-  font-size: 60px; /* Zvýšení velikosti srdce */
-  text-align: center;
 }
