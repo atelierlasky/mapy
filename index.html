@@ -2,164 +2,34 @@
 <html lang="cs">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mapový editor | Atelier Lásky</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mapa vzpomínek | Atelier Lásky</title>
+  <link rel="stylesheet" href="style.css" />
   <link
-    href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css"
     rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-sA+4mLVrj6tDWxyNsmBtfQjEiQf9i7kGSt3jS3k4b+o="
+    crossorigin=""
   />
-  <style>
-    body {
-      margin: 0;
-      background-color: #000;
-      font-family: 'Helvetica Neue', sans-serif;
-      color: #fff;
-    }
-    #map {
-      width: 100vw;
-      height: 100vh;
-    }
-    .controls {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .controls button {
-      background-color: #fff;
-      color: #000;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    .controls button:hover {
-      background-color: #ff9fc4;
-    }
-    .search-container {
-      display: flex;
-    }
-    .search-container input {
-      padding: 6px;
-      border: none;
-      border-radius: 5px 0 0 5px;
-      outline: none;
-    }
-    .search-container button {
-      border-radius: 0 5px 5px 0;
-    }
-    .marker {
-      background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Heart_icon_red_hollow.svg/1024px-Heart_icon_red_hollow.svg.png');
-      background-size: cover;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      cursor: pointer;
-    }
-  </style>
 </head>
 <body>
-  <div id="map"></div>
-  <div class="controls">
-    <div class="search-container">
-      <input type="text" id="search" placeholder="Zadej město..." />
+  <div class="map-container">
+    <div id="map"></div>
+
+    <div class="controls">
+      <input type="text" id="search-input" placeholder="Zadejte město..." />
       <button onclick="searchLocation()">🔍</button>
+      <button onclick="addMarker()">➕ Přidat bod</button>
+      <button onclick="startRoute()">🚶 Trasa</button>
+      <button onclick="toggleMap()">🗺️ Přepnout mapu</button>
+      <button onclick="resetMap()">🔄 Zpět</button>
+      <button onclick="sendJson()">📧 Uložit</button>
     </div>
-    <button onclick="addMarkerMode()">➕ Přidat bod</button>
-    <button onclick="addRouteMode()">📍 Přidat trasu</button>
-    <button onclick="resetMap()">🔄 Začít znovu</button>
-    <button onclick="undoLast()">↩️ Zpět</button>
-    <button onclick="sendData()">📧 Uložit a odeslat</button>
   </div>
 
-  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
-  <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
-  <script>
-    mapboxgl.accessToken = 'pk.eyJ1IjoiZ2l0aHViLXVzZXIiLCJhIjoiY2xwNDRrdnFsMGJxbjNjbXVoN3dnbjVjNSJ9.lE0f_bmZJYfrSzaxrSEgYQ';
-    const map = new mapboxgl.Map({
-      container: 'map',
-      style: 'mapbox://styles/mapbox/dark-v11',
-      center: [14.42076, 50.08804],
-      zoom: 10
-    });
-
-    let addingMarker = false;
-    let addingRoute = false;
-    let currentRoute = [];
-    let allFeatures = [];
-
-    function addMarkerMode() {
-      addingMarker = true;
-      addingRoute = false;
-    }
-
-    function addRouteMode() {
-      addingRoute = true;
-      addingMarker = false;
-      currentRoute = [];
-    }
-
-    map.on('click', (e) => {
-      const coords = [e.lngLat.lng, e.lngLat.lat];
-
-      if (addingMarker) {
-        const el = document.createElement('div');
-        el.className = 'marker';
-        new mapboxgl.Marker(el).setLngLat(coords).addTo(map);
-        allFeatures.push({ type: 'Point', coordinates: coords });
-      }
-
-      if (addingRoute) {
-        currentRoute.push(coords);
-        if (currentRoute.length > 1) {
-          const route = turf.lineString(currentRoute);
-          map.addSource(`route-${Date.now()}`, {
-            type: 'geojson',
-            data: route
-          });
-          map.addLayer({
-            id: `route-${Date.now()}`,
-            type: 'line',
-            source: `route-${Date.now()}`,
-            layout: { 'line-cap': 'round' },
-            paint: {
-              'line-color': '#ff69b4',
-              'line-width': 3
-            }
-          });
-          allFeatures.push(route.geometry);
-        }
-      }
-    });
-
-    function resetMap() {
-      location.reload();
-    }
-
-    function undoLast() {
-      location.reload(); // Zjednodušená verze pro začátek
-    }
-
-    function sendData() {
-      const json = JSON.stringify(allFeatures);
-      window.location.href = `mailto:info@atelierlasky.cz?subject=Moje%20mapa&body=${encodeURIComponent(json)}`;
-    }
-
-    function searchLocation() {
-      const query = document.getElementById('search').value;
-      fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxgl.accessToken}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.features.length > 0) {
-            const [lng, lat] = data.features[0].center;
-            map.flyTo({ center: [lng, lat], zoom: 12 });
-          }
-        });
-    }
-  </script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-o9N1jzEO8U++GkKj1Uor7YfQz0g5BtT0E4gkR3zD+3w="
+    crossorigin=""></script>
+  <script src="script.js"></script>
 </body>
 </html>
