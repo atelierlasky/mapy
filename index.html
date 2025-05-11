@@ -1,21 +1,62 @@
-<form action="https://formsubmit.co/info@atelierlasky.cz" method="POST" id="mapForm">
-  <!-- Skrytá pole -->
-  <input type="hidden" name="_template" value="table">
-  <input type="hidden" name="_subject" value="Nová vzpomínková mapa čeká!">
-  <input type="hidden" name="_next" value="https://www.atelierlasky.cz/dekovna-stranka-mapa/">
-  <input type="hidden" id="mapRoute" name="route">
-  <input type="hidden" id="mapJsonCode" name="json_code">
-  <input type="hidden" id="mapImageUrl" name="map_image_url">
-  <input type="hidden" id="editorUrl" name="editor_url">
-  <div class="controls-row">
-    <input type="text" id="mapText" name="title" placeholder="Vaše vzpomínka" required>
-    <input type="text" id="mapCustomText" name="custom_text" placeholder="Váš text" required>
-    <input type="email" id="userEmail" name="email" placeholder="Váš e-mail" required>
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mapa vzpomínek</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+  <h1>Vytvořte si svou mapu</h1>
+  <div class="map-container">
+    <div id="map" style="height: 400px; width: 100%;"></div>
+    <form action="https://formsubmit.co/info@atelierlasky.cz" method="POST" id="mapForm">
+      <input type="hidden" name="_template" value="table">
+      <input type="hidden" name="_subject" value="Nová vzpomínková mapa čeká!">
+      <input type="hidden" name="_next" value="https://www.atelierlasky.cz/dekovna-stranka-mapa/">
+      <input type="hidden" id="mapRoute" name="route">
+      <input type="hidden" id="mapJsonCode" name="json_code">
+      <input type="hidden" id="mapImageUrl" name="map_image_url">
+      <input type="hidden" id="editorUrl" name="editor_url">
+      <div class="controls-row">
+        <input type="text" id="mapText" name="title" placeholder="Vaše vzpomínka" required>
+        <input type="text" id="mapCustomText" name="custom_text" placeholder="Váš text" required>
+        <input type="email" id="userEmail" name="email" placeholder="Váš e-mail" required>
+      </div>
+      <div class="controls-row">
+        <button type="button" id="placePin">Vybrat bod</button>
+        <button type="button" id="startDrawing">Nakreslit trasu</button>
+        <button type="button" id="resetMap">Vymazat mapu</button>
+        <button type="submit" id="saveMap">Odeslat mapu</button>
+      </div>
+    </form>
   </div>
-  <div class="controls-row">
-    <button type="button" id="placePin">Vybrat bod</button>
-    <button type="button" id="startDrawing">Nakreslit trasu</button>
-    <button type="button" id="resetMap">Vymazat mapu</button>
-    <button type="submit" id="saveMap">Odeslat mapu</button>
-  </div>
-</form>
+  <script>
+    // Inicializace mapy
+    const map = L.map('map').setView([50.0755, 14.4378], 13);
+
+    // Přidání dlaždic OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+    }).addTo(map);
+
+    // Funkce pro přidání bodu
+    document.getElementById('placePin').addEventListener('click', () => {
+      map.once('click', (e) => {
+        L.marker(e.latlng).addTo(map);
+      });
+    });
+
+    // Funkce pro resetování mapy
+    document.getElementById('resetMap').addEventListener('click', () => {
+      map.eachLayer((layer) => {
+        if (layer instanceof L.Marker || layer instanceof L.Polyline) {
+          map.removeLayer(layer);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
