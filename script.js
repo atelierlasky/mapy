@@ -1,105 +1,56 @@
-const light = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '&copy; OpenStreetMap contributors'
-});
+let map = L.map('map').setView([50.0755, 14.4378], 7); // Praha jako výchozí
+let markers = [];
+let currentRoute = null;
+let baseLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+baseLayer.addTo(map);
 
-const dark = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; Stadia Maps'
-});
-
-let currentBaseMap = light;
-const map = L.map('map', {
-  center: [50.0755, 14.4378],
-  zoom: 13,
-  layers: [currentBaseMap]
-});
-
-const drawnItems = L.featureGroup().addTo(map);
-let currentMode = null;
-let routePoints = [];
-const history = [];
-let pointMarker = null;
-
-const pinkIcon = L.icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/833/833472.png',
+// Růžové srdíčko jako ikona
+const heartIcon = L.icon({
+  iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Heart_corazón.svg/32px-Heart_corazón.svg.png',
   iconSize: [32, 32],
-  iconAnchor: [16, 32]
+  iconAnchor: [16, 32],
 });
 
-let routeLine = null;
-
-function setMode(mode) {
-  currentMode = mode;
-  if (mode === 'route') routePoints = [];
-  document.getElementById('mapNotice').style.display = 'none';
+function searchLocation() {
+  const input = document.getElementById("search-input").value;
+  fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${input}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.length > 0) {
+        const latlng = [data[0].lat, data[0].lon];
+        map.setView(latlng, 13);
+      }
+    });
 }
 
-function switchBaseMap() {
-  map.removeLayer(currentBaseMap);
-  currentBaseMap = (currentBaseMap === light) ? dark : light;
-  map.addLayer(currentBaseMap);
+function addMarker() {
+  const marker = L.marker(map.getCenter(), { icon: heartIcon }).addTo(map);
+  markers.push(marker);
 }
 
-map.on('click', function (e) {
-  if (currentMode === 'point') {
-    if (pointMarker) drawnItems.removeLayer(pointMarker);
-    pointMarker = L.marker(e.latlng, { icon: pinkIcon }).addTo(drawnItems);
-  } else if (currentMode === 'route') {
-    const marker = L.marker(e.latlng, { icon: pinkIcon }).addTo(drawnItems);
-    routePoints.push(e.latlng);
-    history.push({ marker });
-
-    if (routeLine) drawnItems.removeLayer(routeLine);
-    routeLine = L.polyline(routePoints, { color: '#df1674' }).addTo(drawnItems);
+function startRoute() {
+  if (currentRoute) {
+    map.removeLayer(currentRoute);
   }
-});
+  currentRoute = L.polyline(markers.map(m => m.getLatLng()), { color: "#d63384" }).addTo(map);
+}
 
-document.getElementById('undoButton').addEventListener('click', () => {
-  if (currentMode === 'route' && routePoints.length > 0) {
-    const last = history.pop();
-    drawnItems.removeLayer(last.marker);
-    routePoints.pop();
-    if (routeLine) {
-      drawnItems.removeLayer(routeLine);
-      routeLine = routePoints.length > 0 ? L.polyline(routePoints, { color: '#df1674' }).addTo(drawnItems) : null;
-    }
+function toggleMap() {
+  map.removeLayer(baseLayer);
+  baseLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png');
+  baseLayer.addTo(map);
+}
+
+function resetMap() {
+  markers.forEach(m => map.removeLayer(m));
+  markers = [];
+  if (currentRoute) {
+    map.removeLayer(currentRoute);
+    currentRoute = null;
   }
-});
+}
 
-document.getElementById('resetButton').addEventListener('click', () => {
-  drawnItems.clearLayers();
-  history.length = 0;
-  routePoints = [];
-  routeLine = null;
-  pointMarker = null;
-  document.getElementById('mapNotice').style.display = 'none';
-});
-
-document.getElementById('saveButton').addEventListener('click', async () => {
-  const email = document.getElementById('emailInput').value;
-  if (!email) {
-    alert('Prosím zadejte svůj e-mail.');
-    return;
-  }
-
-  const geojson = drawnItems.toGeoJSON();
-  if (geojson.features.length === 0) {
-    document.getElementById('mapNotice').style.display = 'block';
-    return;
-  }
-
-  const blob = new Blob([JSON.stringify(geojson, null, 2)], { type: 'application/json' });
-  const file = new File([blob], "mapa.geojson", { type: "application/json" });
-
-  const formData = new FormData();
-  formData.append("_subject", "Nová mapa je připravená!");
-  formData.append("email", email);
-  formData.append("message", `Nový uživatel vytvořil svou mapu, připrav mu ji!\n\nKontakt: ${email}\n\nData:\n${geojson.features.map(f => JSON.stringify(f.geometry)).join('\n\n')}`);
-  formData.append("_next", "https://atelierlasky.cz/dekujeme");
-
-  await fetch("https://formsubmit.co/ajax", {
-    method: "POST",
-    body: formData,
-  });
-
-  alert('Mapa byla úspěšně uložena.');
-});
+function sendJson() {
+  const body = JSON.stringify(markers.map(m => m.getLatLng()));
+  window.location.href = `mailto:info@atelierlasky.cz?subject=Mapa%20vzpominek&body=${encodeURIComponent(body)}`;
+}
