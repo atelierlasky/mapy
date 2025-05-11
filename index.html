@@ -1,35 +1,35 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Mapa vzpomínek | Atelier Lásky</title>
-  <link rel="stylesheet" href="style.css" />
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-sA+4mLVrj6tDWxyNsmBtfQjEiQf9i7kGSt3jS3k4b+o="
-    crossorigin=""
-  />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mapa vzpomínek</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    // Inicializace EmailJS
+    (function() {
+      emailjs.init('ETVZN_o8hJ4XCn8Ms'); // Váš API public key
+    })();
+  </script>
 </head>
 <body>
+  <h1>Vytvořte si svou mapu</h1>
   <div class="map-container">
     <div id="map"></div>
-
     <div class="controls">
-      <input type="text" id="search-input" placeholder="Zadejte město..." />
-      <button onclick="searchLocation()">🔍</button>
-      <button onclick="addMarker()">➕ Přidat bod</button>
-      <button onclick="startRoute()">🚶 Trasa</button>
-      <button onclick="toggleMap()">🗺️ Přepnout mapu</button>
-      <button onclick="resetMap()">🔄 Zpět</button>
-      <button onclick="sendJson()">📧 Uložit</button>
+      <input type="text" id="mapText" placeholder="Text na mapě">
+      <input type="date" id="mapDate">
+      <input type="email" id="userEmail" placeholder="Zadejte svůj e-mail">
+      <button id="addMarker">Přidat špendlík</button>
+      <button id="addRoute">Přidat trasu</button>
+      <button id="undoLastPoint">Zpět</button>
+      <button id="resetMap">Vymazat mapu</button>
+      <button id="sendMap">Uložit a odeslat</button>
     </div>
   </div>
-
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-o9N1jzEO8U++GkKj1Uor7YfQz0g5BtT0E4gkR3zD+3w="
-    crossorigin=""></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
