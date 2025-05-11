@@ -13,7 +13,7 @@ const darkTheme = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x
   attribution: '&copy; OpenStreetMap contributors'
 });
 
-// Nastavení výchozího režimu na umístění špendlíku
+// Výchozí režim na umístění špendlíku
 setPlacePinMode();
 
 // Přidání kurzoru mapě
@@ -23,57 +23,47 @@ function setCursor(cursorClass) {
   container.classList.add(cursorClass);
 }
 
-// Výběr bodu (srdíčko) s výchozím režimem
+// Režim umístění špendlíku
 function setPlacePinMode() {
-  reset(); // Zruší případné kreslení
+  reset();
   setCursor('crosshair-cursor');
-  alert('Klikněte na mapu, kam chcete umístit špendlík.');
   map.once('click', (e) => {
     L.marker(e.latlng, {
       icon: L.divIcon({
         className: 'heart-icon',
-        html: '&#x2764;', // Růžové srdíčko
+        html: '&#x2764;',
         iconSize: [32, 32]
       })
     }).addTo(map);
     pinPlaced = true;
-    setCursor('default-cursor'); // Vrátí defaultní kurzor
+    setCursor('default-cursor');
   });
 }
 
-// Tlačítko pro režim umístění špendlíku
-document.getElementById('placePin').addEventListener('click', () => {
-  setPlacePinMode();
-});
-
 // Kreslení trasy
 document.getElementById('startDrawing').addEventListener('click', () => {
-  if (pinPlaced) reset(); // Zruší špendlík, pokud byl umístěn
+  reset();
   drawing = true;
-  setCursor('crosshair-cursor'); // Nastaví kurzor na crosshair
-  document.getElementById('stopDrawing').style.display = 'inline-block';
+  setCursor('crosshair-cursor');
   currentPolyline = L.polyline([], { color: '#df1674', weight: 4 }).addTo(map);
   map.on('click', (e) => currentPolyline.addLatLng(e.latlng));
 });
 
-// Zastavení kreslení trasy
+// Zastavení kreslení
 document.getElementById('stopDrawing').addEventListener('click', () => {
   drawing = false;
   map.off('click');
-  setCursor('default-cursor'); // Vrátí defaultní kurzor
-  document.getElementById('stopDrawing').style.display = 'none';
+  setCursor('default-cursor');
 });
 
-// Přepínání motivů
+// Motivy
 document.getElementById('toggleTheme').addEventListener('click', () => {
   if (map.hasLayer(lightTheme)) {
     map.removeLayer(lightTheme);
     darkTheme.addTo(map);
-    document.getElementById('colorScheme').value = 'Tmavé';
   } else {
     map.removeLayer(darkTheme);
     lightTheme.addTo(map);
-    document.getElementById('colorScheme').value = 'Světlé';
   }
 });
 
@@ -87,5 +77,5 @@ function reset() {
   drawing = false;
   pinPlaced = false;
   currentPolyline = null;
-  setCursor('default-cursor'); // Vrátí defaultní kurzor
+  setCursor('default-cursor');
 }
