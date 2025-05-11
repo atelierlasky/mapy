@@ -12,93 +12,91 @@ const darkTheme = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x
   attribution: '&copy; OpenStreetMap contributors'
 });
 
-// Zobrazení aktuálního data v českém formátu
-const currentDate = new Date().toLocaleDateString('cs-CZ');
-document.getElementById('currentDate').textContent = currentDate;
-
-// Funkce pro nastavení kurzoru
-function setCursor(cursorClass) {
-  const container = map.getContainer();
-  container.classList.remove('crosshair-cursor', 'default-cursor');
-  container.classList.add(cursorClass);
-}
-
-// Funkce pro nastavení režimu umístění špendlíku
-function setPlacePinMode() {
-  setCursor('crosshair-cursor');
-  map.once('click', (e) => {
-    L.marker(e.latlng, {
-      icon: L.divIcon({
-        className: 'heart-icon',
-        html: '&#x2764;', // Růžové srdce
-        iconSize: [40, 40] // Zvýšení velikosti srdce
-      })
-    }).addTo(map);
-
-    // Přidání špendlíku do routeData
-    routeData.push({ type: 'pin', lat: e.latlng.lat, lng: e.latlng.lng });
-    setCursor('default-cursor');
-  });
-}
-
-// Funkce pro začátek kreslení trasy
-function startDrawing() {
-  setCursor('crosshair-cursor');
+// Funkce pro vykreslení trasy a bodů na mapu
+function drawRouteAndPins() {
+  // Vymazání staré trasy
   if (currentPolyline) {
     map.removeLayer(currentPolyline);
   }
 
-  currentPolyline = L.polyline([], { color: '#df1674', weight: 4 }).addTo(map);
+  // Vykreslení trasy
+  const routePoints = routeData
+    .filter((point) => point.type === 'route')
+    .map((point) => [point.lat, point.lng]);
 
-  map.on('click', (e) => {
-    currentPolyline.addLatLng(e.latlng);
-    routeData.push({ type: 'route', lat: e.latlng.lat, lng: e.latlng.lng });
-  });
-}
-
-// Funkce pro zastavení kreslení trasy
-function stopDrawing() {
-  map.off('click');
-  setCursor('default-cursor');
-}
-
-// Funkce pro přepínání motivů
-function toggleTheme() {
-  if (map.hasLayer(lightTheme)) {
-    map.removeLayer(lightTheme);
-    darkTheme.addTo(map);
-  } else {
-    map.removeLayer(darkTheme);
-    lightTheme.addTo(map);
+  if (routePoints.length > 0) {
+    currentPolyline = L.polyline(routePoints, { color: '#df1674', weight: 4 }).addTo(map);
   }
+
+  // Vykreslení špendlíku
+  routeData
+    .filter((point) => point.type === 'pin')
+    .forEach((pin) => {
+      L.marker([pin.lat, pin.lng], {
+        icon: L.divIcon({
+          className: 'heart-icon',
+          html: '&#x2764;',
+          iconSize: [40, 40]
+        })
+      }).addTo(map);
+    });
 }
 
-// Funkce pro resetování mapy
-function resetMap() {
-  map.eachLayer((layer) => {
-    if (layer instanceof L.Marker || layer instanceof L.Polyline) {
-      map.removeLayer(layer);
-    }
-  });
-  routeData = []; // Vymazání dat trasy a špendlíku
-  if (currentPolyline) {
-    currentPolyline = null;
-  }
+// Funkce pro export mapy jako SVG
+function exportMapAsSVG() {
+  const svgElement = map.getContainer().querySelector('svg'); // Najdeme SVG element mapy
+  const serializer = new XMLSerializer();
+  const svgContent = serializer.serializeToString(svgElement);
+
+  // Vytvoříme blob a URL ke stažení
+  const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+
+  return url; // Vrací URL ke stažení SVG
 }
 
-// Před odesláním formuláře přidáme trasu a kompletní JSON kód do skrytých polí
+// Funkce pro přidání odkazu SVG do formuláře
+function addSVGToForm() {
+  const svgURL = exportMapAsSVG();
+  const svgField = document.createElement('input');
+  svgField.type = 'hidden';
+  svgField.name = 'svg_map_url';
+  svgField.value = svgURL;
+
+  // Přidáme pole do formuláře
+  document.getElementById('mapForm').appendChild(svgField);
+}
+
+// Před odesláním formuláře přidáme SVG mapu a trasu do skrytých polí
 document.getElementById('mapForm').addEventListener('submit', (event) => {
   const routeField = document.getElementById('mapRoute');
   const jsonCodeField = document.getElementById('mapJsonCode');
 
-  // Uložení dat trasy a špendlíku jako JSON
-  const jsonData = JSON.stringify(routeData, null, 2); // Formátovaný JSON
+  // Generování JSON dat
+  const jsonData = JSON.stringify(routeData, null, 2);
   routeField.value = jsonData; // Pro pole route
-  jsonCodeField.value = jsonData; // Pro pole json_code (kompletní JSON kód)
+  jsonCodeField.value = jsonData; // Pro pole json_code
+
+  // Přidání SVG mapy do formuláře
+  addSVGToForm();
 });
 
-// Nastavení tlačítek a akcí
-document.getElementById('placePin').addEventListener('click', setPlacePinMode);
-document.getElementById('startDrawing').addEventListener('click', startDrawing);
-document.getElementById('resetMap').addEventListener('click', resetMap);
-document.getElementById('toggleTheme').addEventListener('click', toggleTheme);
+// Ostatní funkce pro výběr bodů, kreslení trasy a přepínání motivů
+document.getElementById('placePin').addEventListener('click', () => {
+  map.once('click', (e) => {
+    routeData.push({ type: 'pin', lat: e.latlng.lat, lng: e.latlng.lng });
+    drawRouteAndPins(); // Aktualizace vykreslení mapy
+  });
+});
+
+document.getElementById('startDrawing').addEventListener('click', () => {
+  map.on('click', (e) => {
+    routeData.push({ type: 'route', lat: e.latlng.lat, lng: e.latlng.lng });
+    drawRouteAndPins(); // Aktualizace vykreslení mapy
+  });
+});
+
+document.getElementById('resetMap').addEventListener('click', () => {
+  routeData = [];
+  drawRouteAndPins();
+});
