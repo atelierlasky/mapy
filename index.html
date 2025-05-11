@@ -1,32 +1,85 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Editor mapy</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mapa míst</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+    }
+    #map {
+      height: 90vh;
+      width: 100%;
+    }
+    #search {
+      padding: 10px;
+      display: flex;
+      gap: 8px;
+      background: white;
+      z-index: 1000;
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      border-radius: 8px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.2);
+    }
+    input {
+      padding: 6px;
+      flex: 1;
+    }
+    button {
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
+  <div id="search">
+    <input type="text" id="address" placeholder="Zadejte město nebo adresu">
+    <button id="searchBtn">🔍</button>
+  </div>
+  <div id="map"></div>
 
-<h2 style="text-align: center;">Vytvořte si svou mapu</h2>
-<input type="text" id="searchBox" placeholder="Vyhledat místo...">
-<div id="map"></div>
-<div id="mapNotice">Prosíme, nejprve vyberte bod/trasu. Děkujeme.</div>
-<input type="email" id="emailInput" placeholder="Zadejte svůj e-mail...">
-<div class="button-group">
-  <button type="button" class="map-button gray" onclick="setMode('point')">Vyberte bod</button>
-  <button type="button" class="map-button gray" onclick="setMode('route')">Vyberte trasu</button>
-  <button type="button" class="map-button gray" onclick="switchBaseMap()">Přepnout mapu</button>
-</div>
-<div class="button-group">
-  <button type="button" class="map-button yellow" id="undoButton">Zpět</button>
-  <button type="button" class="map-button yellow" id="resetButton">Začít od začátku</button>
-  <button type="button" class="map-button pink" id="saveButton">Uložit mapu</button>
-</div>
-<div class="bottom-space"></div>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([49.7435, 15.338], 7); // Střed ČR
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="script.js"></script>
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap přispěvatelé'
+    }).addTo(map);
 
+    const markerGroup = L.layerGroup().addTo(map);
+
+    async function geocode(query) {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      return data[0];
+    }
+
+    async function handleSearch() {
+      const query = document.getElementById("address").value;
+      if (!query) return;
+      const result = await geocode(query);
+      if (result) {
+        const lat = parseFloat(result.lat);
+        const lon = parseFloat(result.lon);
+        markerGroup.clearLayers();
+        L.marker([lat, lon]).addTo(markerGroup);
+        map.setView([lat, lon], 13);
+      } else {
+        alert("Místo nenalezeno.");
+      }
+    }
+
+    document.getElementById("searchBtn").addEventListener("click", handleSearch);
+    document.getElementById("address").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") handleSearch();
+    });
+  </script>
 </body>
 </html>
