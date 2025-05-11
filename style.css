@@ -17,7 +17,7 @@ h1 {
 .map-container {
   position: relative;
   max-width: 800px;
-  height: 600px; /* Nastavení pevné výšky mapy */
+  height: 400px; /* Zmenšení výšky mapy */
   margin: 20px auto;
   border: 2px solid #f7dce0;
   border-radius: 12px;
