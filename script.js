@@ -83,6 +83,17 @@ function drawRoute() {
   currentPolyline = L.polyline([], { color: '#df1674', weight: 4 }).addTo(map);
 
   map.on('click', (e) => {
+    if (routeData.length === 0) {
+      // Přidáme srdíčko na začátek trasy
+      currentMarker = L.marker(e.latlng, {
+        icon: L.divIcon({
+          className: 'heart-icon',
+          html: '&#x2764;', // Růžové srdce
+          iconSize: [60, 60],
+        }),
+      }).addTo(map);
+    }
+
     currentPolyline.addLatLng(e.latlng);
     routeData.push({ type: 'route', lat: e.latlng.lat, lng: e.latlng.lng }); // Uložíme data trasy
   });
@@ -99,44 +110,32 @@ function toggleTheme() {
   }
 }
 
-// Funkce pro generování URL editovatelné mapy
-function generateEditableMapURL() {
-  const baseURL = 'https://www.mapbox.com/editor'; // Editor mapy (příklad URL)
-  const coordinates = routeData.map((point) => `${point.lng},${point.lat}`).join(';');
-  return `${baseURL}?coordinates=${coordinates}`;
-}
+// Funkce pro kontrolu správnosti formuláře
+function validateForm(event) {
+  if (routeData.length === 0) {
+    alert('Mapa musí obsahovat alespoň 1 bod nebo trasu!');
+    event.preventDefault();
+    return false;
+  }
 
-// Funkce pro generování URL statické mapy
-function generateMapImageURL() {
-  const accessToken = 'YOUR_MAPBOX_ACCESS_TOKEN'; // Nahraďte svým Mapbox tokenem
-  const baseURL = 'https://api.mapbox.com/styles/v1/mapbox/streets-v11/static';
+  // Kontrola vyplnění všech povinných polí
+  const title = document.getElementById('mapText').value.trim();
+  const customText = document.getElementById('mapCustomText').value.trim();
+  const email = document.getElementById('userEmail').value.trim();
 
-  // Přidání špendlíku
-  const pins = routeData
-    .filter((point) => point.type === 'pin')
-    .map((pin) => `pin-l-heart+df1674(${pin.lng},${pin.lat})`)
-    .join(',');
+  if (!title || !customText || !email) {
+    alert('Vyplňte prosím všechna pole ve formuláři!');
+    event.preventDefault();
+    return false;
+  }
 
-  // Přidání trasy
-  const routePath = routeData
-    .filter((point) => point.type === 'route')
-    .map((route) => `${route.lng},${route.lat}`)
-    .join(';');
-  const path = `path-5+df1674-1(${routePath})`;
-
-  // Centrování mapy na první bod
-  const center = routeData[0] ? `${routeData[0].lng},${routeData[0].lat}` : '14.4362,50.0780';
-
-  // Velikost mapy a zoom
-  const size = '800x400';
-  const zoom = 12;
-
-  // Sestavení konečné URL
-  return `${baseURL}/${pins},${path}/${center},${zoom}/${size}?access_token=${accessToken}`;
+  return true;
 }
 
 // Před odesláním formuláře přidáme data a URL mapy
 document.getElementById('mapForm').addEventListener('submit', (event) => {
+  if (!validateForm(event)) return;
+
   const routeField = document.getElementById('mapRoute');
   const jsonCodeField = document.getElementById('mapJsonCode');
   const mapImageField = document.getElementById('mapImageUrl');
@@ -145,14 +144,6 @@ document.getElementById('mapForm').addEventListener('submit', (event) => {
   const jsonData = JSON.stringify(routeData, null, 2);
   routeField.value = jsonData; // Pro pole route
   jsonCodeField.value = jsonData; // Pro pole json_code
-
-  // Přidání URL editovatelné mapy
-  const editableMapURL = generateEditableMapURL();
-  const editableMapField = document.createElement('input');
-  editableMapField.type = 'hidden';
-  editableMapField.name = 'editable_map_url';
-  editableMapField.value = editableMapURL;
-  document.getElementById('mapForm').appendChild(editableMapField);
 
   // Přidání URL statické mapy
   const mapImageURL = generateMapImageURL();
