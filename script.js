@@ -1,5 +1,5 @@
 const map = L.map('map', {
-  zoomControl: false, // Odstranění zoomovacích tlačítek
+  zoomControl: false,
 }).setView([50.0755, 14.4378], 13);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -37,7 +37,7 @@ function placePin() {
       icon: L.divIcon({
         className: 'heart-icon',
         html: '&#x2764;',
-        iconSize: [50, 50], // Velikost srdíčka
+        iconSize: [50, 50],
       }),
     }).addTo(map);
     routeData.push({ type: 'pin', lat: e.latlng.lat, lng: e.latlng.lng });
@@ -59,13 +59,20 @@ function drawRoute() {
         icon: L.divIcon({
           className: 'heart-icon',
           html: '&#x2764;',
-          iconSize: [50, 50], // Velikost srdíčka
+          iconSize: [50, 50],
         }),
       }).addTo(map);
     }
     currentPolyline.addLatLng(e.latlng);
     routeData.push({ type: 'route', lat: e.latlng.lat, lng: e.latlng.lng });
   });
+}
+
+// Generování odkazu na mapu
+function generateMapURL() {
+  const baseURL = 'https://atelierlasky.github.io/mapy/';
+  const jsonString = encodeURIComponent(JSON.stringify(routeData));
+  return `${baseURL}?data=${jsonString}`;
 }
 
 // Validace formuláře
@@ -89,18 +96,19 @@ function validateForm(event) {
   return true;
 }
 
-// Před odesláním dat do formuláře
+// Přidání dat do formuláře před odesláním
 document.getElementById('mapForm').addEventListener('submit', (event) => {
-  // Validace dat
   if (!validateForm(event)) return;
 
   // Převod dat do JSON
   const routeField = document.getElementById('mapRoute');
   const jsonCodeField = document.getElementById('mapJsonCode');
+  const mapURLField = document.getElementById('mapImageUrl'); // Použití pole pro URL
 
   const jsonData = JSON.stringify(routeData, null, 2);
-  routeField.value = jsonData; // Uložení dat do skrytého pole pro trasu
-  jsonCodeField.value = jsonData; // Uložení dat do skrytého pole pro JSON kód
+  routeField.value = jsonData; // Uložení JSON kódu
+  jsonCodeField.value = jsonData; // Uložení JSON kódu
+  mapURLField.value = generateMapURL(); // Vygenerování odkazu na dynamickou mapu
 });
 
 // Přidání event listenerů na tlačítka
