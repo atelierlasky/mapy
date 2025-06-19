@@ -1,19 +1,84 @@
-<form action="https://formsubmit.co/info@atelierlasky.cz" method="POST" id="mapForm">
-  <input type="hidden" name="_template" value="table">
-  <input type="hidden" name="_subject" value="Nová vzpomínková mapa čeká!">
-  <input type="hidden" name="_next" value="https://www.atelierlasky.cz/dekovna-stranka-mapa/">
-  <input type="hidden" id="mapRoute" name="route">
-  <input type="hidden" id="mapJsonCode" name="json_code">
-  <input type="hidden" id="mapImageUrl" name="map_url"> <!-- Pole pro URL -->
-  <div class="controls-row">
-    <input type="text" id="mapText" name="title" placeholder="Vaše vzpomínka" required>
-    <input type="text" id="mapCustomText" name="custom_text" placeholder="Váš text" required>
-    <input type="email" id="userEmail" name="email" placeholder="Váš e-mail" required>
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <title>Mapa s vlastním špendlíkem a uložením GPS</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <!-- Google Fonts: Poppins & Material Symbols -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=favorite" />
+  <!-- Vlastní CSS -->
+  <link rel="stylesheet" href="custom-map-style.css" />
+  <style>
+    body {
+      background: #101015;
+      color: #fff;
+      font-family: 'Poppins', Arial, sans-serif;
+      margin: 0;
+      padding: 0 0 64px 0;
+    }
+    h1 {
+      text-align: center;
+      margin: 32px 0 10px 0;
+      font-weight: 600;
+      color: #d2005f;
+      letter-spacing: 0.04em;
+    }
+    .centered {
+      text-align: center;
+      margin-bottom: 24px;
+      color: #a0a0a6;
+    }
+    .map-container {
+      margin: 0 auto;
+      max-width: 950px;
+      min-width: 320px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Vyberte místo na mapě</h1>
+  <div class="centered">Najděte místo, označte špendlíkem a uložte GPS souřadnice pro svou objednávku.</div>
+  <div class="map-container" style="height:600px;">
+    <div id="leaflet-map" style="width:100%;height:100%;"></div>
+    <!-- Map Controls: Search, Zoom -->
+    <div class="map-controls">
+      <div class="map-search" style="position:relative;">
+        <span class="material-symbols-outlined">search</span>
+        <input type="text" id="searchBox" placeholder="Vyhledat místo..." autocomplete="off" />
+        <div id="autocomplete" class="map-autocomplete" style="display:none;"></div>
+      </div>
+      <div class="map-zoom-controls">
+        <button class="map-zoom-btn" id="zoom-in" title="Přiblížit"><span class="material-symbols-outlined">add</span></button>
+        <button class="map-zoom-btn" id="zoom-out" title="Oddálit"><span class="material-symbols-outlined">remove</span></button>
+      </div>
+    </div>
+    <!-- Uložit -->
+    <button class="save-btn" id="save-btn">ULOŽIT</button>
+    <!-- Dialog -->
+    <div id="map-dialog-backdrop">
+      <div id="map-dialog">
+        <div id="dialog-step1">
+          <div style="margin-bottom: 18px;">Přejete si uložit tyto GPS souřadnice?</div>
+          <div class="dialog-gps" id="dialog-gps"></div>
+          <div class="dialog-actions">
+            <button class="dialog-btn" id="dialog-yes">ANO</button>
+            <button class="dialog-btn" id="dialog-no">NE</button>
+          </div>
+        </div>
+        <div id="dialog-step2" style="display:none;">
+          <strong>Prosíme, tyto GPS souřadnice okopírujte a zadejte je do poznámky ve vaší objednávce</strong>
+          <div class="dialog-gps" id="final-gps"></div>
+          <button class="dialog-btn" id="copy-btn" style="margin-top:10px;">KOPÍROVAT</button>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="controls-row">
-    <button type="button" id="placePin">Vybrat bod</button>
-    <button type="button" id="startDrawing">Nakreslit trasu</button>
-    <button type="button" id="resetMap">Vymazat mapu</button>
-    <button type="submit" id="saveMap">Odeslat mapu</button>
-  </div>
-</form>
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <!-- Vlastní JS -->
+  <script src="custom-map.js"></script>
+</body>
+</html>
