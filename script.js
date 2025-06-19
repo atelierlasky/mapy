@@ -1,117 +1,175 @@
-const map = L.map('map', {
-  zoomControl: false,
-}).setView([50.0755, 14.4378], 13);
+// GLOBALS
+let map;
+let marker = null;
+let lastLatLng = null;
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '&copy; OpenStreetMap contributors',
-}).addTo(map);
+// 1. Inicializace mapy
+window.addEventListener('DOMContentLoaded', function() {
+  map = L.map('leaflet-map', {
+    zoomControl: false, // vlastní zoom tlačítka
+    attributionControl: false
+  }).setView([50.0755, 14.4378], 13); // výchozí Praha
 
-let currentPolyline = null;
-let currentMarker = null;
-let routeData = [];
-let isDrawing = false;
-let isPlacingPin = false;
+  // Snížený, světlý styl OSM (nejblíže Colliers Light 2021)
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19
+  }).addTo(map);
 
-// Funkce pro vymazání mapy
-function clearMap() {
-  map.eachLayer((layer) => {
-    if (layer instanceof L.Marker || layer instanceof L.Polyline) {
-      map.removeLayer(layer);
-    }
+  // Vlastní zoom tlačítka
+  document.getElementById('zoom-in').onclick = () => map.zoomIn();
+  document.getElementById('zoom-out').onclick = () => map.zoomOut();
+
+  // Kliknutí na mapu: umísti/posuň špendlík
+  map.on('click', function(e) {
+    placePin(e.latlng);
   });
-  routeData = [];
-  currentPolyline = null;
-  currentMarker = null;
-  isDrawing = false;
-  isPlacingPin = false;
-}
 
-// Funkce pro přidání bodu
-function placePin() {
-  clearMap();
-  isPlacingPin = true;
-  isDrawing = false;
+  // Ukládací dialog
+  document.getElementById('save-btn').onclick = showSaveDialog;
 
-  map.once('click', (e) => {
-    currentMarker = L.marker(e.latlng, {
-      icon: L.divIcon({
-        className: 'heart-icon',
-        html: '&#x2764;',
-        iconSize: [50, 50],
-      }),
-    }).addTo(map);
-    routeData.push({ type: 'pin', lat: e.latlng.lat, lng: e.latlng.lng });
-  });
-}
+  // Dialog ovládání
+  document.getElementById('dialog-yes').onclick = showFinalDialog;
+  document.getElementById('dialog-no').onclick = closeDialog;
+  document.getElementById('copy-btn').onclick = function() {
+    const gps = document.getElementById('final-gps').textContent;
+    navigator.clipboard.writeText(gps).then(() => {
+      document.getElementById('copy-btn').textContent = "ZKOPÍROVÁNO!";
+      setTimeout(() => { document.getElementById('copy-btn').textContent = "KOPÍROVAT"; }, 1200);
+    });
+  };
 
-// Funkce pro kreslení trasy
-function drawRoute() {
-  clearMap();
-  isDrawing = true;
-  isPlacingPin = false;
-
-  currentPolyline = L.polyline([], { color: '#df1674', weight: 4 }).addTo(map);
-
-  map.on('click', (e) => {
-    if (currentPolyline.getLatLngs().length === 0) {
-      // Přidání srdíčka na první bod
-      L.marker(e.latlng, {
-        icon: L.divIcon({
-          className: 'heart-icon',
-          html: '&#x2764;',
-          iconSize: [50, 50],
-        }),
-      }).addTo(map);
-    }
-    currentPolyline.addLatLng(e.latlng);
-    routeData.push({ type: 'route', lat: e.latlng.lat, lng: e.latlng.lng });
-  });
-}
-
-// Generování odkazu na mapu
-function generateMapURL() {
-  const baseURL = 'https://atelierlasky.github.io/mapy/';
-  const jsonString = encodeURIComponent(JSON.stringify(routeData));
-  return `${baseURL}?data=${jsonString}`;
-}
-
-// Validace formuláře
-function validateForm(event) {
-  if (routeData.length === 0) {
-    alert('Mapa musí obsahovat alespoň 1 bod nebo trasu!');
-    event.preventDefault();
-    return false;
-  }
-
-  const title = document.getElementById('mapText').value.trim();
-  const customText = document.getElementById('mapCustomText').value.trim();
-  const email = document.getElementById('userEmail').value.trim();
-
-  if (!title || !customText || !email) {
-    alert('Vyplňte prosím všechna pole ve formuláři!');
-    event.preventDefault();
-    return false;
-  }
-
-  return true;
-}
-
-// Přidání dat do formuláře před odesláním
-document.getElementById('mapForm').addEventListener('submit', (event) => {
-  if (!validateForm(event)) return;
-
-  // Převod dat do JSON
-  const routeField = document.getElementById('mapRoute');
-  const jsonCodeField = document.getElementById('mapJsonCode');
-  const mapURLField = document.getElementById('mapImageUrl'); // Použití pole pro URL
-
-  const jsonData = JSON.stringify(routeData, null, 2);
-  routeField.value = jsonData; // Uložení JSON kódu
-  jsonCodeField.value = jsonData; // Uložení JSON kódu
-  mapURLField.value = generateMapURL(); // Vygenerování odkazu na dynamickou mapu
+  // Vyhledávací pole
+  setupSearchAutocomplete();
 });
 
-// Přidání event listenerů na tlačítka
-document.getElementById('placePin').addEventListener('click', placePin);
-document.getElementById('startDrawing').addEventListener('click', drawRoute);
-document.getElementById('resetMap').addEventListener('click', clearMap);
+// 2. Pin s Material Symbol
+function getCustomIcon() {
+  return L.divIcon({
+    className: 'map-pin',
+    html: `<span class="material-symbols-outlined">favorite</span>`,
+    iconSize: [48, 48],
+    iconAnchor: [24, 44],
+    popupAnchor: [0, -44]
+  });
+}
+
+function placePin(latlng) {
+  lastLatLng = latlng;
+  if (!marker) {
+    marker = L.marker(latlng, {
+      icon: getCustomIcon(),
+      draggable: true
+    }).addTo(map);
+    marker.on('dragend', function(e) {
+      lastLatLng = marker.getLatLng();
+    });
+  } else {
+    marker.setLatLng(latlng);
+  }
+  map.panTo(latlng);
+}
+
+// 3. Ovládání dialogu
+function showSaveDialog() {
+  if (!lastLatLng) return alert("Nejprve označte místo na mapě.");
+  document.getElementById('dialog-gps').textContent = `${lastLatLng.lat.toFixed(7)}, ${lastLatLng.lng.toFixed(7)}`;
+  document.getElementById('map-dialog-backdrop').style.display = 'flex';
+  document.getElementById('dialog-step1').style.display = '';
+  document.getElementById('dialog-step2').style.display = 'none';
+}
+
+function closeDialog() {
+  document.getElementById('map-dialog-backdrop').style.display = 'none';
+}
+function showFinalDialog() {
+  document.getElementById('dialog-step1').style.display = 'none';
+  document.getElementById('dialog-step2').style.display = '';
+  document.getElementById('final-gps').textContent = `${lastLatLng.lat.toFixed(7)}, ${lastLatLng.lng.toFixed(7)}`;
+}
+
+// 4. Vyhledávání a autocomplete s Nominatim OSM
+function setupSearchAutocomplete() {
+  const input = document.getElementById('searchBox');
+  const dropdown = document.getElementById('autocomplete');
+  let timer = null;
+  let selected = -1;
+  let results = [];
+
+  input.addEventListener('input', function() {
+    const q = input.value.trim();
+    if (timer) clearTimeout(timer);
+    if (q.length < 3) {
+      dropdown.style.display = 'none';
+      return;
+    }
+    timer = setTimeout(() => {
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&addressdetails=1&limit=6`)
+        .then(r => r.json())
+        .then(data => {
+          results = data;
+          if (data.length === 0) {
+            dropdown.innerHTML = '<div class="map-autocomplete-item">Nenalezeno…</div>';
+            dropdown.style.display = 'block';
+            selected = -1;
+            return;
+          }
+          dropdown.innerHTML = data.map((item, idx) =>
+            `<div class="map-autocomplete-item${idx === selected ? ' selected' : ''}" data-idx="${idx}">
+              ${item.display_name}
+            </div>`
+          ).join('');
+          dropdown.style.display = 'block';
+          selected = -1;
+        });
+    }, 320);
+  });
+
+  input.addEventListener('keydown', function(e) {
+    if (dropdown.style.display !== 'block') return;
+    if (e.key === 'ArrowDown') {
+      selected = Math.min(selected + 1, results.length - 1);
+      updateDropdownSelection();
+      e.preventDefault();
+    } else if (e.key === 'ArrowUp') {
+      selected = Math.max(selected - 1, 0);
+      updateDropdownSelection();
+      e.preventDefault();
+    } else if (e.key === 'Enter') {
+      if (selected >= 0 && results[selected]) {
+        chooseResult(selected);
+        e.preventDefault();
+      }
+    } else if (e.key === 'Escape') {
+      dropdown.style.display = 'none';
+    }
+  });
+
+  dropdown.addEventListener('mousedown', function(e) {
+    if (e.target.classList.contains('map-autocomplete-item')) {
+      const idx = parseInt(e.target.getAttribute('data-idx'), 10);
+      if (!isNaN(idx)) chooseResult(idx);
+    }
+  });
+
+  function updateDropdownSelection() {
+    Array.from(dropdown.children).forEach((el, idx) => {
+      if (idx === selected) el.classList.add('selected');
+      else el.classList.remove('selected');
+    });
+  }
+
+  function chooseResult(idx) {
+    const item = results[idx];
+    input.value = item.display_name;
+    dropdown.style.display = 'none';
+    const latlng = L.latLng(parseFloat(item.lat), parseFloat(item.lon));
+    placePin(latlng);
+    map.setView(latlng, 16);
+  }
+
+  document.addEventListener('click', function(e) {
+    if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+      dropdown.style.display = 'none';
+    }
+  });
+}
