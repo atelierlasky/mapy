@@ -1,3 +1,7 @@
+<p>
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8hiRjYG3gU9--ucGQl0fYOdXRo3RllBY&amp;libraries=places&amp;callback=initMap" async="" defer="defer"></script>
+</p>
 <script>emailjs.init("ETVZN_o8hJ4XCn8Ms");
 
 document.getElementById("map-form").addEventListener("submit", function(e) {
