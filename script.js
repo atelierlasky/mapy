@@ -1,175 +1,181 @@
-// GLOBALS
-let map;
-let marker = null;
-let lastLatLng = null;
+<script>emailjs.init("ETVZN_o8hJ4XCn8Ms");
 
-// 1. Inicializace mapy
-window.addEventListener('DOMContentLoaded', function() {
-  map = L.map('leaflet-map', {
-    zoomControl: false, // vlastní zoom tlačítka
-    attributionControl: false
-  }).setView([50.0755, 14.4378], 13); // výchozí Praha
+document.getElementById("map-form").addEventListener("submit", function(e) {
+  e.preventDefault();
 
-  // Snížený, světlý styl OSM (nejblíže Colliers Light 2021)
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19
-  }).addTo(map);
+  if (!document.getElementById("consent-checkbox").checked) {
+    alert("Prosím, potvrďte souhlas.");
+    return;
+  }
 
-  // Vlastní zoom tlačítka
-  document.getElementById('zoom-in').onclick = () => map.zoomIn();
-  document.getElementById('zoom-out').onclick = () => map.zoomOut();
+  const gps = document.getElementById("gps-coordinates").value;
+  const text = document.querySelector('textarea[name="text"]').value;
+  const userEmail = document.querySelector('input[name="reply_to"]').value;
 
-  // Kliknutí na mapu: umísti/posuň špendlík
-  map.on('click', function(e) {
-    placePin(e.latlng);
+  const combined = `GPS souřadnice: ${gps}\nText na vygravírování: ${text}`;
+
+  // Zkopíruj do schránky
+  navigator.clipboard.writeText(combined).then(() => {
+    // Odešli e-mail přes EmailJS
+    emailjs.sendForm("default_service", "mapa", this)
+      .then(() => {
+        alert("Děkujeme, mapa byla v pořádku odeslána do našeho ateliéru. Prosíme, objednejte si zvolené provedení.");
+        this.reset();
+      })
+      .catch((err) => {
+        console.error("Chyba:", err);
+        alert("Odeslání se nezdařilo.");
+      });
   });
-
-  // Ukládací dialog
-  document.getElementById('save-btn').onclick = showSaveDialog;
-
-  // Dialog ovládání
-  document.getElementById('dialog-yes').onclick = showFinalDialog;
-  document.getElementById('dialog-no').onclick = closeDialog;
-  document.getElementById('copy-btn').onclick = function() {
-    const gps = document.getElementById('final-gps').textContent;
-    navigator.clipboard.writeText(gps).then(() => {
-      document.getElementById('copy-btn').textContent = "ZKOPÍROVÁNO!";
-      setTimeout(() => { document.getElementById('copy-btn').textContent = "KOPÍROVAT"; }, 1200);
-    });
-  };
-
-  // Vyhledávací pole
-  setupSearchAutocomplete();
 });
 
-// 2. Pin s Material Symbol
-function getCustomIcon() {
-  return L.divIcon({
-    className: 'map-pin',
-    html: `<span class="material-symbols-outlined">favorite</span>`,
-    iconSize: [48, 48],
-    iconAnchor: [24, 44],
-    popupAnchor: [0, -44]
-  });
-}
 
-function placePin(latlng) {
-  lastLatLng = latlng;
-  if (!marker) {
-    marker = L.marker(latlng, {
-      icon: getCustomIcon(),
-      draggable: true
-    }).addTo(map);
-    marker.on('dragend', function(e) {
-      lastLatLng = marker.getLatLng();
+    document.getElementById("copy-btn").addEventListener("click", () => {
+      const gps = document.getElementById("gps-coordinates").value;
+      navigator.clipboard.writeText(gps).then(() => {
+        const btn = document.getElementById("copy-btn");
+        btn.textContent = "ZKOPÍROVÁNO!";
+        setTimeout(() => (btn.textContent = "OKOPÍROVAT GPS"), 2000);
+      });
     });
-  } else {
-    marker.setLatLng(latlng);
+
+    function initMap() {
+const mapStyle = [
+  {
+    featureType: "poi",
+    elementType: "geometry",
+    stylers: [{ color: "#ffffff" }] // pozadí POI
+  },
+  {
+    featureType: "poi",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#333333" }] // nápisy POI
+  },
+  {
+    featureType: "poi",
+    elementType: "labels.icon",
+    stylers: [{ saturation: -100 }] // tmavší ikony
+  },
+  {
+    featureType: "poi.business",
+    stylers: [{ visibility: "on" }]
+  },
+  {
+    featureType: "poi.park",
+    elementType: "geometry",
+    stylers: [{ color: "#e3e3e3" }]
+  },
+  {
+    featureType: "road",
+    elementType: "geometry",
+    stylers: [{ color: "#ffffff" }]
+  },
+  {
+    featureType: "road",
+    elementType: "labels.text.fill",
+    stylers: [{ color: "#888888" }]
+  },
+  {
+    featureType: "water",
+    elementType: "geometry",
+    stylers: [{ color: "#6b98c3" }]
+  },
+  {
+    featureType: "administrative",
+    elementType: "geometry",
+    stylers: [{ visibility: "off" }]
+  },
+  {
+    featureType: "transit",
+    elementType: "geometry",
+    stylers: [{ color: "#e6e6e6" }]
+  },
+  {
+    featureType: "landscape",
+    elementType: "geometry",
+    stylers: [{ color: "#f2f2f2" }]
   }
-  map.panTo(latlng);
-}
+];
 
-// 3. Ovládání dialogu
-function showSaveDialog() {
-  if (!lastLatLng) return alert("Nejprve označte místo na mapě.");
-  document.getElementById('dialog-gps').textContent = `${lastLatLng.lat.toFixed(7)}, ${lastLatLng.lng.toFixed(7)}`;
-  document.getElementById('map-dialog-backdrop').style.display = 'flex';
-  document.getElementById('dialog-step1').style.display = '';
-  document.getElementById('dialog-step2').style.display = 'none';
-}
+      const defaultLocation = { lat: 50.083815, lng: 14.395536 };
+      const map = new google.maps.Map(document.getElementById("map"), {
+        center: defaultLocation,
+        zoom: 15,
+        styles: mapStyle,
+        mapTypeControl: false,
+        streetViewControl: false,
+      });
 
-function closeDialog() {
-  document.getElementById('map-dialog-backdrop').style.display = 'none';
-}
-function showFinalDialog() {
-  document.getElementById('dialog-step1').style.display = 'none';
-  document.getElementById('dialog-step2').style.display = '';
-  document.getElementById('final-gps').textContent = `${lastLatLng.lat.toFixed(7)}, ${lastLatLng.lng.toFixed(7)}`;
-}
+      const geocoder = new google.maps.Geocoder();
+      const infowindow = new google.maps.InfoWindow();
+      const input = document.getElementById("pac-input");
+      const autocomplete = new google.maps.places.Autocomplete(input);
+      autocomplete.bindTo("bounds", map);
 
-// 4. Vyhledávání a autocomplete s Nominatim OSM
-function setupSearchAutocomplete() {
-  const input = document.getElementById('searchBox');
-  const dropdown = document.getElementById('autocomplete');
-  let timer = null;
-  let selected = -1;
-  let results = [];
+      let marker = new google.maps.Marker({
+        map,
+        draggable: true,
+        icon: {
+          url: "https://www.atelierlasky.cz/user/documents/upload/favorite_50dp_D2005F_FILL1_wght400_GRAD0_opsz48.svg",
+          scaledSize: new google.maps.Size(40, 40),
+          anchor: new google.maps.Point(20, 40)
+        },
+        visible: false
+      });
 
-  input.addEventListener('input', function() {
-    const q = input.value.trim();
-    if (timer) clearTimeout(timer);
-    if (q.length < 3) {
-      dropdown.style.display = 'none';
-      return;
-    }
-    timer = setTimeout(() => {
-      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&addressdetails=1&limit=6`)
-        .then(r => r.json())
-        .then(data => {
-          results = data;
-          if (data.length === 0) {
-            dropdown.innerHTML = '<div class="map-autocomplete-item">Nenalezeno…</div>';
-            dropdown.style.display = 'block';
-            selected = -1;
-            return;
+      marker.addListener("dragend", () => {
+        updateLocation(marker.getPosition());
+      });
+
+      autocomplete.addListener("place_changed", () => {
+        infowindow.close();
+        const place = autocomplete.getPlace();
+        if (!place.geometry) return;
+        map.setCenter(place.geometry.location);
+        map.setZoom(17);
+        marker.setPosition(place.geometry.location);
+        marker.setVisible(true);
+        updateLocation(place.geometry.location);
+      });
+
+      map.addListener("click", (e) => {
+        marker.setPosition(e.latLng);
+        marker.setVisible(true);
+        updateLocation(e.latLng);
+      });
+
+      document.getElementById("search-btn").addEventListener("click", () => {
+        const address = input.value.trim();
+        if (!address) return;
+        geocoder.geocode({ address }, (results, status) => {
+          if (status === "OK" && results[0]) {
+            map.setCenter(results[0].geometry.location);
+            map.setZoom(17);
+            marker.setPosition(results[0].geometry.location);
+            marker.setVisible(true);
+            updateLocation(results[0].geometry.location);
           }
-          dropdown.innerHTML = data.map((item, idx) =>
-            `<div class="map-autocomplete-item${idx === selected ? ' selected' : ''}" data-idx="${idx}">
-              ${item.display_name}
-            </div>`
-          ).join('');
-          dropdown.style.display = 'block';
-          selected = -1;
         });
-    }, 320);
-  });
+      });
 
-  input.addEventListener('keydown', function(e) {
-    if (dropdown.style.display !== 'block') return;
-    if (e.key === 'ArrowDown') {
-      selected = Math.min(selected + 1, results.length - 1);
-      updateDropdownSelection();
-      e.preventDefault();
-    } else if (e.key === 'ArrowUp') {
-      selected = Math.max(selected - 1, 0);
-      updateDropdownSelection();
-      e.preventDefault();
-    } else if (e.key === 'Enter') {
-      if (selected >= 0 && results[selected]) {
-        chooseResult(selected);
-        e.preventDefault();
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          document.getElementById("search-btn").click();
+        }
+      });
+
+      function updateLocation(latLng) {
+        const lat = latLng.lat().toFixed(6);
+        const lng = latLng.lng().toFixed(6);
+        document.getElementById("gps-coordinates").value = `${lat}, ${lng}`;
+        geocoder.geocode({ location: latLng }, (results, status) => {
+          const address = status === "OK" && results[0] ? results[0].formatted_address : "Adresa není k dispozici";
+          infowindow.setContent(`
+            <strong>GPS souřadnice:</strong><br>${lat}, ${lng}<br>
+            <strong>Adresa:</strong><br>${address}
+          `);
+          infowindow.open(map, marker);
+        });
       }
-    } else if (e.key === 'Escape') {
-      dropdown.style.display = 'none';
-    }
-  });
-
-  dropdown.addEventListener('mousedown', function(e) {
-    if (e.target.classList.contains('map-autocomplete-item')) {
-      const idx = parseInt(e.target.getAttribute('data-idx'), 10);
-      if (!isNaN(idx)) chooseResult(idx);
-    }
-  });
-
-  function updateDropdownSelection() {
-    Array.from(dropdown.children).forEach((el, idx) => {
-      if (idx === selected) el.classList.add('selected');
-      else el.classList.remove('selected');
-    });
-  }
-
-  function chooseResult(idx) {
-    const item = results[idx];
-    input.value = item.display_name;
-    dropdown.style.display = 'none';
-    const latlng = L.latLng(parseFloat(item.lat), parseFloat(item.lon));
-    placePin(latlng);
-    map.setView(latlng, 16);
-  }
-
-  document.addEventListener('click', function(e) {
-    if (!input.contains(e.target) && !dropdown.contains(e.target)) {
-      dropdown.style.display = 'none';
-    }
-  });
-}
+    }</script>
